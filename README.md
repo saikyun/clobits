@@ -61,31 +61,9 @@ cd clobits
 make clean bindings
 ```
 
-This creates the folder `src/bindings`, in which you'll find:
+## Get libSDL2
 
-### Generated files
-
-These are included in the repo so that one can read the generated source when looking at github. As soon as you start using this library, you will overwrite these files. They should not be modified by hand.
-
-#### sdl.c and sdl.h -- generated c code
-
-These are necessary for polyglot to be able to call native libs.
-
-### sdl_ni.clj
-
-Clojure code that generates classes and interfaces to be with native-image
-
-#### sdl_ns.clj
-
-Clojure namespace that is used with polyglot.
-
-### How to put it all together
-
-Look at `src/clobits/examples/startup.clj` to see how you can use the same code for both polyglot and native-image.
-
-## Running the SDL example
-
-You need libSDL2 on your path, and possibly added to `"-Djava.library.path=<LIB_PATH_HERE>"` in `project.clj`.
+You need libSDL2 on your path, and possibly added to `"-Djava.library.path=<LIB_PATH_HERE>"` under your OS profile in `project.clj`. I've put some defaults there, but I'm not sure they're universal.
 
 ## Run on JVM using Polyglot
 
@@ -105,6 +83,28 @@ Cmd+Q to exit on MacOS. You can also press the X.
 ## Errors
 
 If you don't run `clean` when switching between poly / ni targets you can get complaints about not finding `clojure.core/seq?`. I think this has to do with how leningen caches .class-files. Just run `make clean ni / poly` and you'll be fine.
+
+## The generated files
+
+Running `make clean bindings` generates the folder `src/bindings`. This folder is included in the repo so that one can read the generated source when looking at github. As soon as you start using this library, you will overwrite these files. They should not be modified by hand.
+
+In `src/bindings` you'll find:
+
+#### sdl.c and sdl.h -- generated c code
+
+These are necessary for polyglot to be able to call native libs.
+
+### sdl_ni.clj
+
+Clojure code that generates classes and interfaces to be with native-image
+
+#### sdl_ns.clj
+
+Clojure namespace that is used with polyglot.
+
+### How to put it all together
+
+Look at `src/clobits/examples/startup.clj` to see how you can use the same code for both polyglot and native-image.
 
 ## Thanks
 
