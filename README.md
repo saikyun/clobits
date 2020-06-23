@@ -48,7 +48,14 @@ I'd be very happy if you tried to use it and have questions. If you have a speci
 
 Tested on macos and linux.
 
-## Generating bindings
+## Get the source
+
+```
+git clone https://github.com/Saikyun/clobits
+cd clobits
+```
+
+## Generate bindings (optional)
 
 ```
 make clean bindings
@@ -80,13 +87,13 @@ Look at `src/clobits/examples/startup.clj` to see how you can use the same code 
 
 You need libSDL2 on your path, and possibly added to `"-Djava.library.path=<LIB_PATH_HERE>"` in `project.clj`.
 
-## Polyglot (jvm)
+## Run on JVM using Polyglot
 
 ```
 make clean poly
 ```
 
-## native-image
+## Compile and run a native binary using native-image
 
 ```
 make clean ni
