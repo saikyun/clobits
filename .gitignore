@@ -1,0 +1,10 @@
+.DS_Store
+/.cpcache
+/*.so
+/target
+/woop
+/.lein-repl-history
+/libs
+/.nrepl-port
+/*.log
+/sdl_example

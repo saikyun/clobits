@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# Copyright © 2020 Michiel Borkent
+# Original `compile` from https://github.com/borkdude/babashka
+
+if [ -z "$GRAALVM_HOME" ]; then
+    echo "Please set GRAALVM_HOME"
+    exit 1
+fi
+
+"$GRAALVM_HOME/bin/gu" install native-image || true
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    lein with-profiles +clojure-1.10.2-alpha1,+linux do clean, uberjar
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    lein with-profiles +clojure-1.10.2-alpha1,+macos do clean, uberjar
+fi
+
+args=( "-jar" "target/examples_sdl.jar" \
+              "-H:CLibraryPath=libs" \
+              "-H:Name=sdl_example" \
+              "-H:+ReportExceptionStackTraces" \
+              "-J-Dclojure.spec.skip-macros=true" \
+              "-J-Dclojure.compiler.direct-linking=true" \
+              "--initialize-at-build-time"  \
+	      "-H:Log=registerResource:" \
+              "--verbose" \
+              "--no-fallback" \
+              "--no-server" \
+              "--report-unsupported-elements-at-runtime"
+     )
+
+$GRAALVM_HOME/bin/native-image "${args[@]}"
