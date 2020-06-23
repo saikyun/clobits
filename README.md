@@ -1,10 +1,10 @@
-# clobits -- clojure ❤️ bits
+# Clobits — Clojure ❤️ bits
 
-Use C inside Clojure -- run it on the JVM or compile a native binary.
+Use C inside Clojure, then run it on the JVM or compile a native binary.
 
 ## Features
 
-- One source to rule them all -- write code once, run it on both jvm and native binary
+- One source to rule them all — write code once, run it on both jvm and native binary
 
 ```
 (ns clobits.examples.sdl.startup
