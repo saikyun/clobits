@@ -68,7 +68,7 @@ These are necessary for polyglot to be able to call native libs.
 
 Clojure code that generates classes and interfaces to be with native-image
 
-#€## sdl_ns.clj
+#### sdl_ns.clj
 
 Clojure namespace that is used with polyglot.
 
