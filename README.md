@@ -104,7 +104,7 @@ If you don't run `clean` when switching between poly / ni targets you can get co
 - sogaiu -- support, testing and helpful discussion
 - cornerwings -- java + native image example: https://github.com/cornerwings/graal-native-interaction
 - u/duhace -- java + polyglot example: https://www.reddit.com/r/java/comments/8s7sr8/interacting_with_c_using_graalvm/
-- borkdude -- project setup for clojure / native compilation: https://github.com/borkdude/clj-kondo
+- borkdude -- help, project setup for clojure / native image compilation: https://github.com/borkdude/clj-kondo
 
 ## License
 
