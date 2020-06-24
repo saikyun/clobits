@@ -6,7 +6,7 @@ Use C inside Clojure, then run it on the JVM or compile a native binary.
 
 - One source to rule them all — write code once, run it on both jvm and native binary
 
-```
+```clojure
 (ns clobits.examples.sdl.startup
   (:require [clobits.native-interop :refer [*native-image*]])
   (:gen-class))
