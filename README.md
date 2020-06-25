@@ -1,4 +1,4 @@
-# Clobits — Clojure ❤️ bits
+# Clobits — Clojure ❤️ C
 
 Use C inside Clojure, then run it on the JVM or compile a native binary.
 
