@@ -35,6 +35,13 @@ This project is a work in progress. I wanted to share this mostly to add another
 
 I'd be very happy if you tried to use it and have questions. If you have a specific C library you want to get working, let me know. Since the generated code can be reused, it'd be nice if we could host the bits required for various C libraries at clojars. :)
 
+### Known unknowns
+
+If you know how to solve the problems below, please tell me how! :) Either through an issue, or [@Saikyun](https://twitter.com/Saikyun) on twitter.
+
+- Creating strings in Clojure, to be sent to a function taking a `char *` -- can't get this to work in polyglot
+- Calling variadic C functions that do not have a `va_args` variation (see [printf](http://www.cplusplus.com/reference/cstdio/printf/?kw=printf) vs [vprintf](http://www.cplusplus.com/reference/cstdio/vprintf/))
+
 ## Prerequisites
 
 * graalvm -- tested with `graalvm-ce-java11-20.2.0-dev`: https://github.com/graalvm/graalvm-ce-dev-builds/releases
