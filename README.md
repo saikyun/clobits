@@ -37,10 +37,10 @@ I'd be very happy if you tried to use it and have questions. If you have a speci
 
 ### Known unknowns
 
-If you know how to solve the problems below, please tell me how! :) Either through an issue, or [@Saikyun](https://twitter.com/Saikyun) on twitter.
-
 - Creating strings in Clojure, to be sent to a function taking a `char *` -- can't get this to work in polyglot
 - Calling variadic C functions that do not have a `va_args` variation (see [printf](http://www.cplusplus.com/reference/cstdio/printf/?kw=printf) vs [vprintf](http://www.cplusplus.com/reference/cstdio/vprintf/))
+
+If you know how to solve the problems below, please tell me how! :) Either through an issue, or [@Saikyun](https://twitter.com/Saikyun) on twitter.
 
 ## Prerequisites
 
