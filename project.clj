@@ -5,17 +5,29 @@
   :jvm-opts []
   :resources ["src" "libs"]
   
-  :profiles {:uberjar {:main clobits.examples.sdl.startup
-                       :global-vars {*assert* false}
-                       :uberjar-name "examples_sdl.jar"
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                                  "-Dclojure.spec.skip-macros=true"]
-                       :aot :all}
+  :profiles {:sdl-uberjar {:main clobits.examples.sdl.startup
+                           :global-vars {*assert* false}
+                           :uberjar-name "examples_sdl.jar"
+                           :jvm-opts ["-Dclojure.compiler.direct-linking=true"
+                                      "-Dclojure.spec.skip-macros=true"]
+                           :aot :all}
+             
+             :ncurses-uberjar {:main clobits.examples.ncurses.startup
+                               :global-vars {*assert* false}
+                               :uberjar-name "examples_ncurses.jar"
+                               :jvm-opts ["-Dclojure.compiler.direct-linking=true"
+                                          "-Dclojure.spec.skip-macros=true"]
+                               :aot :all}
              
              :runner {:main clobits.examples.sdl.startup
                       :source-paths ["src"]
                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                  "-Dclojure.spec.skip-macros=true"]}
+             
+             :ncurses-poly {:main clobits.examples.ncurses.startup
+                            :source-paths ["src"]
+                            :jvm-opts ["-Dclojure.compiler.direct-linking=true"
+                                       "-Dclojure.spec.skip-macros=true"]}
              
              :macos {:jvm-opts [;; sdl function regarding the window / renderer
                                 ;; can only be run on first thread on macos

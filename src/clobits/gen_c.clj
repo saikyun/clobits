@@ -1,7 +1,20 @@
 (ns clobits.gen-c
   (:require [clojure.string :as str]
-            [clobits.util :refer [add-prefix-to-sym create-subdirs! snake-case get-c-path get-h-path get-so-path]]
+            [clobits.util :as u :refer [add-prefix-to-sym create-subdirs! snake-case get-c-path get-h-path get-so-path]]
             [clojure.java.shell :refer [sh]]))
+
+(defn get-arg
+  [i {:keys [sym]}]
+  (if-not sym (str "arg" i) sym))
+
+(defn gen-args
+  [args]
+  (str/join ", " (map-indexed (fn [i {:keys [type pointer sym prefixes]}]
+                                (if (= type 'variadic)
+                                  "..."
+                                  (str (str/join " " prefixes) " " type " " pointer " " 
+                                       (if-not sym (str "arg" i)
+                                               sym)))) args)))
 
 (defn generate-shadowing-function
   "Takes prototype data and generates a c function declaration.
@@ -16,10 +29,9 @@
        pointer
        " _SHADOWING_"
        sym
-       "(" (str/join ", " (map (fn [{:keys [type pointer sym prefixes]}]
-                                 (str (str/join " " prefixes) " " type " " pointer " " sym)) args)) ") {\n"
+       "(" (gen-args args) ") {\n"
        "  " (when (not (and (= ret "void")
-                            (nil? pointer))) "return ") sym "(" (str/join ", " (map :sym args)) ");"
+                            (nil? pointer))) "return ") sym "(" (str/join ", " (map-indexed get-arg args)) ");"
        "\n}"))
 
 (comment
@@ -35,8 +47,7 @@
        pointer
        " "
        sym
-       "(" (str/join ", " (map (fn [{:keys [type pointer sym prefixes]}]
-                                 (str (str/join " " prefixes) " " type " " pointer " " sym)) args)) ");"))
+       "(" (gen-args args) ");"))
 
 (defn gen-c-file
   [includes fns & [{:keys [inline-c]}]]
@@ -62,31 +73,41 @@
 
 (defn gen-lib
   [{:keys [lib-name includes protos shadow-prefix] :or {shadow-prefix "_SHADOWING_"} :as opts}]
-  (let [c-code (gen-c-file [(str (last (str/split (snake-case lib-name) #"/")) ".h")]
-                           (map generate-shadowing-function protos)
-                           opts) 
+  (let [c-code (str (gen-c-file [(str (last (str/split (snake-case lib-name) #"/")) ".h")]
+                                (map generate-shadowing-function protos)
+                                opts))
         protos-as-data-shadowed (map (partial add-prefix-to-sym shadow-prefix) protos)
-        h-code (gen-h-file includes (map generate-c-prototype protos-as-data-shadowed))]
+        h-code (str "#if IS_POLYGLOT
+#include <polyglot.h>
+#endif\n"
+                    (gen-h-file includes
+                                (map generate-c-prototype protos-as-data-shadowed)))]
     {:shadow-prefix shadow-prefix    
      :c-code c-code
      :h-code h-code}))
 
 (defn compile-c
   [{:keys [c-code h-code libs] :as opts}]
-  (let [c-path (get-c-path opts)
+  (let [c-path (get-c-path opts) 
         h-path (get-h-path opts)]
     
     (create-subdirs! c-path)
     (create-subdirs! h-path)
     
-    (println "Spitting c-code: " (apply str (take 100 c-code)) "...\n")
-    (spit c-path c-code)
+    (println "Spitting c-code:" (apply str (take 100 c-code)) "...\n")
+    (spit c-path (str c-code))
+    
     (println "Spitting h-code:" (apply str (take 100 h-code)) "...\n")
     (spit h-path h-code)
-
+    
+    (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
+                          (map #(str "-l" %) (conj libs "polyglot-mock"))
+                          ["-shared" "-fPIC" "-D" "IS_POLYGLOT=1" "-o" (get-so-path opts)])]
+      (apply sh sh-opts))
+    
     (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
                           (map #(str "-l" %) libs)
-                          ["-shared" "-fPIC" "-o" (get-so-path opts)])]
+                          ["-shared" "-fPIC" "-o" (u/get-so-path-ni opts)])]
       (apply sh sh-opts))))
 
 (defn persist-lib!

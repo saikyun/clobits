@@ -35,6 +35,22 @@
   [{:keys [src-dir lib-name]}]
   (str src-dir "/" (snake-case lib-name) ".h"))
 
+(defn get-c-path-ni
+  [{:keys [src-dir lib-name]}]
+  (str src-dir "/" (snake-case lib-name) "_ni.c"))
+
+(defn get-h-path-ni
+  [{:keys [src-dir lib-name]}]
+  (str src-dir "/" (snake-case lib-name) "_ni.h"))
+
+(defn so-lib-name-ni
+  [s]
+  (str (no-subdir s) "-ni"))
+
+(defn get-so-path-ni
+  [{:keys [lib-dir lib-name]}]
+  (str lib-dir "/lib" (so-lib-name-ni lib-name) ".so"))
+
 (defn get-so-path
   [{:keys [lib-dir lib-name]}]
   (str lib-dir "/lib" (no-subdir lib-name) ".so"))

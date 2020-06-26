@@ -107,6 +107,15 @@ int SDL_FillRect(SDL_Surface*    dst,
 
 (def poly-interfaces (map #(gp/struct->gen-interface poly-types % {:lib-name 'bindings.sdl}) (vals structs)))
 
+(def conversion-functions
+  {'int '.asInt
+   'bindings.sdl_ni.SDL_PixelFormat 'identity
+   'org.graalvm.nativeimage.c.type.VoidPointer 'identity
+   
+   'org.graalvm.nativeimage.c.type.CCharPointer 'identity #_ '.asString ;; constant char* can't be coerced into strings
+   'void 'identity
+   'char `(~'.as Character)})
+
 (defn -main
   []
   (println "Creating libs")
@@ -123,6 +132,7 @@ int SDL_FillRect(SDL_Surface*    dst,
               :append-clj poly-interfaces #_ protocols-and-extend
               :append-ni ni-interfaces
               :types types
+              :poly-conversions conversion-functions
               :lib-name 'bindings.sdl
               :src-dir "src"
               :lib-dir "libs"

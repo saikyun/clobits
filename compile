@@ -11,14 +11,14 @@ fi
 "$GRAALVM_HOME/bin/gu" install native-image || true
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    lein with-profiles +clojure-1.10.2-alpha1,+linux do clean, uberjar
+    lein with-profiles +clojure-1.10.2-alpha1,+linux,+ncurses-uberjar do clean, uberjar
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    lein with-profiles +clojure-1.10.2-alpha1,+macos do clean, uberjar
+    lein with-profiles +clojure-1.10.2-alpha1,+macos,+ncurses-uberjar do clean, uberjar
 fi
 
-args=( "-jar" "target/examples_sdl.jar" \
+args=( "-jar" "target/examples_ncurses.jar" \
               "-H:CLibraryPath=libs" \
-              "-H:Name=sdl_example" \
+              "-H:Name=ncurses_example" \
               "-H:+ReportExceptionStackTraces" \
               "-J-Dclojure.spec.skip-macros=true" \
               "-J-Dclojure.compiler.direct-linking=true" \
