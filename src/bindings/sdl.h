@@ -1,3 +1,6 @@
+#if IS_POLYGLOT
+#include <polyglot.h>
+#endif
 #include <stdio.h>
 #include <SDL2/SDL.h>
 

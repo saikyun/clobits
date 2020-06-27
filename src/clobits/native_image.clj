@@ -2,7 +2,7 @@
   (:require [clobits.patch-gen-class :as pgc]
             [clojure.java.io :as io]
             [clobits.clj-common :refer [gen-clojure-mapping get-type-throw]]
-            [clobits.util :refer [get-h-path snake-case no-subdir]]
+            [clobits.util :as u :refer [snake-case no-subdir]]
             [clojure.string :as str]
             [clojure.pprint :refer [pprint pp]]))
 
@@ -19,7 +19,7 @@
     `(gen-interface
       :name ~(with-meta (symbol (str lib-name "_ni." clj-sym))
                {org.graalvm.nativeimage.c.CContext context
-                org.graalvm.nativeimage.c.function.CLibrary (no-subdir lib-name)
+                org.graalvm.nativeimage.c.function.CLibrary (u/so-lib-name-ni lib-name)
                 org.graalvm.nativeimage.c.struct.CStruct c-sym})
       :extends [org.graalvm.word.PointerBase]
       :methods ~(->> (map #(attr->method types %) attrs)
@@ -61,7 +61,7 @@
     `(pgc/gen-class-native
       :name ~(with-meta (symbol (str java-friendly-lib-name))
                {org.graalvm.nativeimage.c.CContext (symbol (str java-friendly-lib-name "_ni.Headers"))
-                org.graalvm.nativeimage.c.function.CLibrary (no-subdir lib-name)}))))
+                org.graalvm.nativeimage.c.function.CLibrary (u/so-lib-name-ni lib-name)}))))
 
 (comment
   (binding [*print-meta* true]
@@ -94,7 +94,7 @@
               org.graalvm.nativeimage.c.CContext$Directives
               (~'getHeaderFiles
                [~'_]
-               [~(str "\"" (System/getProperty "user.dir") "/" (get-h-path opts) "\"")]))]
+               [~(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path opts) "\"")]))]
           
           append-ni
           

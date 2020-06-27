@@ -5,17 +5,21 @@
   :jvm-opts []
   :resources ["src" "libs"]
   
-  :profiles {:uberjar {:main clobits.examples.sdl.startup
-                       :global-vars {*assert* false}
-                       :uberjar-name "examples_sdl.jar"
+  :profiles {:uberjar {:global-vars {*assert* false}
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                                  "-Dclojure.spec.skip-macros=true"]
+                                  "-Dclojure.spec.skip-macros=true"]                           
                        :aot :all}
              
-             :runner {:main clobits.examples.sdl.startup
-                      :source-paths ["src"]
-                      :jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                                 "-Dclojure.spec.skip-macros=true"]}
+             :sdl-uberjar {:main clobits.examples.sdl.startup
+                           :uberjar-name "examples_sdl.jar"}
+             
+             :ncurses-uberjar {:main clobits.examples.ncurses.startup
+                               :uberjar-name "examples_ncurses.jar"}
+             
+             :sdl-poly {:main clobits.examples.sdl.startup}
+             
+             :ncurses-poly {:main clobits.examples.ncurses.startup}
+             
              
              :macos {:jvm-opts [;; sdl function regarding the window / renderer
                                 ;; can only be run on first thread on macos

@@ -37,14 +37,15 @@
    [(def init1687 (.getMember sdl-sym \"SDL_Init\"))
     (clojure.core/defn init ([flags] (.execute init1687 (clojure.core/object-array [flags]))))]
   ```"
-  [[f-sym {:keys [ret pointer sym args]}] {:keys [types lib-name lib-sym structs]}]
+  [[f-sym {:keys [ret pointer sym args]}] {:keys [types poly-conversions lib-name lib-sym structs]}]
   (let [f (if (= ret "void")
             '.executeVoid
             '.execute)
         f-gensym (gensym f-sym)
         ret-struct (get structs ret)
         conv-func (when-not ret-struct
-                    (convert-function-throw (get-type-throw types {:type ret
+                    (convert-function-throw poly-conversions
+                                            (get-type-throw types {:type ret
                                                                    :pointer pointer})))
         wrap-cast (fn [body] (if ret-struct
                                `(~'.as ~body ~(struct-sym->interface-sym lib-name (:clj-sym ret-struct)))
@@ -53,9 +54,12 @@
                        (if (and conv-func (not= conv-func 'identity))
                          `(-> ~body ~conv-func)
                          body))]
-    `[(def ~(with-meta f-gensym {:private true}) (.getMember ~lib-sym ~sym))
+    `[(def ~(symbol (str "^" {:private true})) ~f-gensym (.getMember ~lib-sym ~sym))
       (defn ~f-sym
-        ~(if-let [as (seq (map (comp symbol :sym) args))]
+        ~(if-let [as (seq (->> args
+                               (map-indexed #(or (:sym %2)
+                                                 (str "arg" %1)))
+                               (map symbol)))]
            `(~(into [] as)
              ~(-> `(~f ~f-gensym (object-array ~(into [] as)))
                   wrap-cast
@@ -74,8 +78,9 @@
 
 (defn lib-boilerplate
   [lib-name {:keys [libs] :as opts}]
-  (let [lib-sym (gensym (str "lib"))
+  (let [lib-sym 'polyglot-lib #_ (gensym (str "lib"))
         context-f-sym (gensym "context-f") 
+        context-sym  'polyglot-context
         source-f-sym (gensym "source-f")
         so-path (get-so-path opts)]
     {:lib-name lib-name
@@ -86,20 +91,22 @@
                         (:import org.graalvm.polyglot.Context
                                  org.graalvm.polyglot.Source
                                  org.graalvm.polyglot.Value))
-                     `(def ~'empty-array (object-array 0))]
+                     `(def ~(symbol (str "^" {:private true})) ~'empty-array (object-array 0))]
                     [`(defn ~context-f-sym
                         []
                         (-> (org.graalvm.polyglot.Context/newBuilder (into-array ["llvm"]))
-                            (.allowIO true)
-                            (.allowNativeAccess true)
+                            (.allowAllAccess true)
+                            #_(.allowIO true)
+                            #_(.allowNativeAccess true)
                             (.build)))
-                     `(defn ~source-f-sym
+                     `(defn ~(symbol (str "^" {:private true})) ~source-f-sym
                         []
                         (-> (org.graalvm.polyglot.Source/newBuilder "llvm" (if (string? ~so-path)
                                                                              (clojure.java.io/file ~so-path)
                                                                              ~so-path))
                             (.build)))
-                     `(def ~lib-sym (.eval (~context-f-sym) (~source-f-sym)))])}))
+                     `(def ~context-sym (~context-f-sym))
+                     `(def ~lib-sym (.eval ~context-sym (~source-f-sym)))])}))
 
 (defn gen-lib*
   [lib-name fns {:keys [append-clj] :as opts}]

@@ -40,17 +40,8 @@
     t
     (throw (Error. (str "No type defined for type: " t)))))
 
-(def convert-function
-  {'int '.asInt
-   'bindings.sdl_ni.SDL_PixelFormat 'identity
-   'org.graalvm.nativeimage.c.type.VoidPointer 'identity
-
-   'org.graalvm.nativeimage.c.type.CCharPointer 'identity #_ '.asString ;; at least constant char* can't be coerced into strings
-   'void 'identity
-   'char `(~'.as Character)})
-
 (defn convert-function-throw
-  [t]
-  (if-let [cf (convert-function t)] 
+  [poly-conversions t]
+  (if-let [cf (and (some? poly-conversions) (poly-conversions t))]
     cf
-    (throw (Error. (str "No convert-function defined for type: " t)))))
+    (throw (Error. (str "No poly-conversions defined for type: " t ", in list " poly-conversions)))))
