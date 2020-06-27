@@ -37,8 +37,6 @@ I'd be very happy if you tried to use it and have questions. If you have a speci
 
 ### Known unknowns and possible solutions
 
-- Creating strings in Clojure, to be sent to a function taking a `char *` -- can't get this to work in polyglot
-  - You can inline a function such as `char * string(int size) { return (char*)malloc(size); }`, then fiddle around with that chunk of memory. But it's not very clean
 - Calling variadic C functions that do not have a `va_args` variation (see [printf](http://www.cplusplus.com/reference/cstdio/printf/?kw=printf) vs [vprintf](http://www.cplusplus.com/reference/cstdio/vprintf/))
   - If the function has a `va_args` variant, I'd recommend just using that for now
 
