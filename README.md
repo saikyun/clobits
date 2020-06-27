@@ -64,11 +64,30 @@ git clone https://github.com/Saikyun/clobits
 cd clobits
 ```
 
+
 ## Generate bindings (optional)
 
 ```
 make clean bindings
 ```
+
+# ncurses Example
+
+Displays `hello` for a second.
+
+## Run on JVM using Polyglot
+
+```
+make clean ncurses-poly
+```
+
+## Compile and run a native binary using native-image
+
+```
+make clean ncurses-ni
+```
+
+# SDL Example
 
 ## Get libSDL2
 
@@ -77,13 +96,13 @@ You need libSDL2 on your path, and possibly added to `"-Djava.library.path=<LIB_
 ## Run on JVM using Polyglot
 
 ```
-make clean poly
+make clean sdl-poly
 ```
 
 ## Compile and run a native binary using native-image
 
 ```
-make clean ni
+make clean sdl-ni
 ```
 
 You should see a red square on a white background.
