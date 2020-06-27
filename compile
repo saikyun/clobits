@@ -10,20 +10,33 @@ fi
 
 "$GRAALVM_HOME/bin/gu" install native-image || true
 
+OS_FLAG="UNSET"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    lein with-profiles +clojure-1.10.2-alpha1,+linux,+ncurses-uberjar do clean, uberjar
+    OS_FLAG="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    lein with-profiles +clojure-1.10.2-alpha1,+macos,+ncurses-uberjar do clean, uberjar
+    OS_FLAG="macos"
 fi
 
-args=( "-jar" "target/examples_ncurses.jar" \
+TARGET_JAR = "UNSET"
+NAME = "UNSET"
+if [[ "$NI_EXAMPLE" == "sdl" ]]; then
+    TARGET_JAR="target/examples_sdl.jar"
+    NAME="sdl_example"
+elif [[ "$NI_EXAMPLE" == "ncurses" ]]; then
+    TARGET_JAR="target/examples_ncurses.jar"
+    NAME="ncurses_example"
+fi
+
+lein with-profiles +clojure-1.10.2-alpha1,+$OS_FLAG,+$NI_EXAMPLE-uberjar do clean, uberjar
+
+args=( "-jar" $TARGET_JAR \
               "-H:CLibraryPath=libs" \
-              "-H:Name=ncurses_example" \
+              "-H:Name=" $NAME \
               "-H:+ReportExceptionStackTraces" \
               "-J-Dclojure.spec.skip-macros=true" \
               "-J-Dclojure.compiler.direct-linking=true" \
               "--initialize-at-build-time"  \
-	      "-H:Log=registerResource:" \
+              "-H:Log=registerResource:" \
               "--verbose" \
               "--no-fallback" \
               "--no-server" \

@@ -94,7 +94,7 @@
               org.graalvm.nativeimage.c.CContext$Directives
               (~'getHeaderFiles
                [~'_]
-               [~(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path-ni opts) "\"")]))]
+               [~(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path opts) "\"")]))]
           
           append-ni
           
