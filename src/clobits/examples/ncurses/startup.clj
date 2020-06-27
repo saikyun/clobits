@@ -58,14 +58,16 @@
     `(string->char-pointer ~s)))
 
 (defn -main [& args]
-  (ncurses/initscr)
-  
-  (let [yo "hej"]
-    (ncurses/printw (char* yo)))
-  (ncurses/refresh)
-  (Thread/sleep 1000)
-  
-  (ncurses/endwin))
+  (let [w (ncurses/initscr)]
+    
+    (let [yo "hej"]
+      (ncurses/printw (char* yo)))
+    (ncurses/refresh)
+    (Thread/sleep 1000)
+    
+    (ncurses/delwin w)
+    
+    (ncurses/endwin)))
 
 (comment
   (with-heap [s (char* "\nbye!")]

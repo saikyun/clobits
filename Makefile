@@ -28,10 +28,10 @@ ncurses-bindings:
 bindings: sdl-bindings ncurses-bindings
 
 sdl-poly: bindings
-	lein with-profiles +runner,$(OSFLAG),+sdl-poly do clean, run
+	lein with-profiles $(OSFLAG),+sdl-poly do clean, run
 
 ncurses-poly: bindings
-	lein with-profiles +runner,$(OSFLAG),+ncurses-poly do clean, run
+	lein with-profiles $(OSFLAG),+ncurses-poly do clean, run
 
 sdl-ni: bindings
 	NATIVE_IMAGE=true NI_EXAMPLE=sdl ./compile && LD_LIBRARY_PATH=./libs ./sdl_example

@@ -10,15 +10,12 @@ fi
 
 "$GRAALVM_HOME/bin/gu" install native-image || true
 
-OS_FLAG="UNSET"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS_FLAG="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     OS_FLAG="macos"
 fi
 
-TARGET_JAR = "UNSET"
-NAME = "UNSET"
 if [[ "$NI_EXAMPLE" == "sdl" ]]; then
     TARGET_JAR="target/examples_sdl.jar"
     NAME="sdl_example"

@@ -16,11 +16,6 @@
              :ncurses-uberjar {:main clobits.examples.ncurses.startup
                                :uberjar-name "examples_ncurses.jar"}
              
-             
-             :poly {:source-paths ["src"]
-                    :jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                               "-Dclojure.spec.skip-macros=true"]}
-             
              :sdl-poly {:main clobits.examples.sdl.startup}
              
              :ncurses-poly {:main clobits.examples.ncurses.startup}
