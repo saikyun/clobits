@@ -10,7 +10,7 @@
 (def ^{:private true} empty-array (clojure.core/object-array 0))
 
 (clojure.core/defn
- context-f609
+ context-f635
  []
  (clojure.core/->
   (org.graalvm.polyglot.Context/newBuilder
@@ -20,7 +20,7 @@
 
 (clojure.core/defn
  ^{:private true}
- source-f610
+ source-f636
  []
  (clojure.core/->
   (org.graalvm.polyglot.Source/newBuilder
@@ -31,126 +31,86 @@
     "libs/libbindings$ncurses.so"))
   (.build)))
 
-(def polyglot-context (context-f609))
+(def polyglot-context (context-f635))
 
-(def polyglot-lib (.eval polyglot-context (source-f610)))
-
-(def
- ^{:private true}
- silly611
- (.getMember polyglot-lib "_SHADOWING_silly"))
-
-(clojure.core/defn
- silly
- ([arg0] (.executeVoid silly611 (clojure.core/object-array [arg0]))))
+(def polyglot-lib (.eval polyglot-context (source-f636)))
 
 (def
  ^{:private true}
- string612
- (.getMember polyglot-lib "_SHADOWING_string"))
-
-(clojure.core/defn
- string
- ([size] (.execute string612 (clojure.core/object-array [size]))))
-
-(def
- ^{:private true}
- other-print-w613
- (.getMember polyglot-lib "_SHADOWING_other_print_w"))
-
-(clojure.core/defn
- other-print-w
- ([value]
-  (clojure.core/->
-   (.execute other-print-w613 (clojure.core/object-array [value]))
-   .asInt)))
-
-(def
- ^{:private true}
- append-char614
- (.getMember polyglot-lib "_SHADOWING_append_char"))
-
-(clojure.core/defn
- append-char
- ([str pos c]
-  (.execute append-char614 (clojure.core/object-array [str pos c]))))
-
-(def
- ^{:private true}
- free615
+ free637
  (.getMember polyglot-lib "_SHADOWING_free"))
 
 (clojure.core/defn
  free
- ([ptr] (.executeVoid free615 (clojure.core/object-array [ptr]))))
+ ([ptr] (.executeVoid free637 (clojure.core/object-array [ptr]))))
 
 (def
  ^{:private true}
- malloc616
+ malloc638
  (.getMember polyglot-lib "_SHADOWING_malloc"))
 
 (clojure.core/defn
  malloc
- ([size] (.executeVoid malloc616 (clojure.core/object-array [size]))))
+ ([size] (.executeVoid malloc638 (clojure.core/object-array [size]))))
 
 (def
  ^{:private true}
- initscr617
+ initscr639
  (.getMember polyglot-lib "_SHADOWING_initscr"))
 
-(clojure.core/defn initscr ([] (.execute initscr617 empty-array)))
+(clojure.core/defn initscr ([] (.execute initscr639 empty-array)))
 
 (def
  ^{:private true}
- delwin618
+ delwin640
  (.getMember polyglot-lib "_SHADOWING_delwin"))
 
 (clojure.core/defn
  delwin
  ([win]
   (clojure.core/->
-   (.execute delwin618 (clojure.core/object-array [win]))
+   (.execute delwin640 (clojure.core/object-array [win]))
    .asInt)))
 
 (def
  ^{:private true}
- endwin619
+ endwin641
  (.getMember polyglot-lib "_SHADOWING_endwin"))
 
 (clojure.core/defn
  endwin
- ([] (clojure.core/-> (.execute endwin619 empty-array) .asInt)))
+ ([] (clojure.core/-> (.execute endwin641 empty-array) .asInt)))
 
 (def
  ^{:private true}
- printw620
+ printw642
  (.getMember polyglot-lib "_SHADOWING_printw"))
 
 (clojure.core/defn
  printw
  ([arg0]
   (clojure.core/->
-   (.execute printw620 (clojure.core/object-array [arg0]))
+   (.execute printw642 (clojure.core/object-array [arg0]))
    .asInt)))
 
 (def
  ^{:private true}
- refresh621
+ refresh643
  (.getMember polyglot-lib "_SHADOWING_refresh"))
 
 (clojure.core/defn
  refresh
- ([] (clojure.core/-> (.execute refresh621 empty-array) .asInt)))
+ ([] (clojure.core/-> (.execute refresh643 empty-array) .asInt)))
 
 (def
  ^{:private true}
- wrefresh622
+ wrefresh644
  (.getMember polyglot-lib "_SHADOWING_wrefresh"))
 
 (clojure.core/defn
  wrefresh
  ([win]
   (clojure.core/->
-   (.execute wrefresh622 (clojure.core/object-array [win]))
+   (.execute wrefresh644 (clojure.core/object-array [win]))
    .asInt)))
 

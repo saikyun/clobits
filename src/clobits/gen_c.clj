@@ -16,6 +16,48 @@
                                        (if-not sym (str "arg" i)
                                                sym)))) args)))
 
+(defn is-char*?
+  [t]
+  (and (= "char" (:type t))
+       (some? (:pointer t))))
+
+(defn wrap-char*
+  [args ret-f]
+  (let [char-args (filter is-char*? args)
+        new-syms (into {} (map #(vector (:sym %) (gensym (:sym %))) char-args))
+        declarations (map #(str "char *" (new-syms (:sym %)) ";") char-args)
+        setters (map #(let [new-sym (new-syms (:sym %))]
+                        (str
+                         "if (polyglot_is_string(" (:sym %) ")) {
+ int length = polyglot_get_string_size(" (:sym %) ");
+ char str[length];
+ polyglot_as_string(" (:sym %) ", str, length, \"UTF-8\");
+ " new-sym " = str;
+ } else {
+ " new-sym " = " (:sym %) ";
+ }"))
+                     char-args)
+        new-args (map (fn [a] (update a :sym #(if-let [sym (new-syms %)]
+                                                sym
+                                                %))) args)]
+    
+    (str
+     "
+#if IS_POLYGLOT
+"
+     (str/join "\n" declarations)
+     "\n"
+     (str/join "\n" setters)
+     "
+ " (ret-f new-args) "
+#else
+  " (ret-f args) "
+#endif
+"
+     ))
+  
+  )
+
 (defn generate-shadowing-function
   "Takes prototype data and generates a c function declaration.
   
@@ -24,19 +66,31 @@
   ;;=> \"int  _SHADOWING_SDL_Init(Uint32  flags) {\\n  return SDL_Init(flags);\\n}\"
   ```"
   [{:keys [ret sym pointer args]}]
-  (str ret
-       " "
-       pointer
-       " _SHADOWING_"
-       sym
-       "(" (gen-args args) ") {\n"
-       "  " (when (not (and (= ret "void")
-                            (nil? pointer))) "return ") sym "(" (str/join ", " (map-indexed get-arg args)) ");"
-       "\n}"))
+  (let [args (map-indexed (fn [i arg]
+                            (update arg :sym #(if % % (str "arg" i)))) args)
+        ret-part-f
+        (fn [args]
+          (str "  " (when (not (and (= ret "void")
+                                    (nil? pointer))) "return ")
+               sym "(" (str/join ", " (map-indexed get-arg args)) ");"))]
+    (str ret
+         " "
+         pointer
+         " _SHADOWING_"
+         sym
+         "(" (gen-args args) ") {\n"
+         
+         (if (seq (filter is-char*? args))
+           (wrap-char* args ret-part-f)
+           (ret-part-f args))
+         
+         "\n}")))
 
 (comment
   (generate-shadowing-function {:ret "int", :sym "SDL_Init", :args [{:type "Uint32", :sym "flags"}]})
   ;;=> "int  _SHADOWING_SDL_Init(Uint32  flags) {\n  return SDL_Init(flags);\n}"
+  
+  (generate-shadowing-function {:ret "int", :sym "printw", :args [{:type "char", :pointer "*", :sym "flags"}]})
   )
 
 (defn generate-c-prototype
@@ -100,15 +154,19 @@
     (println "Spitting h-code:" (apply str (take 100 h-code)) "...\n")
     (spit h-path h-code)
     
-    (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
-                          (map #(str "-l" %) (conj libs "polyglot-mock"))
-                          ["-shared" "-fPIC" "-D" "IS_POLYGLOT=1" "-o" (get-so-path opts)])]
-      (apply sh sh-opts))
-    
-    (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
-                          (map #(str "-l" %) libs)
-                          ["-shared" "-fPIC" "-o" (u/get-so-path-ni opts)])]
-      (apply sh sh-opts))))
+    (let [r1 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
+                                   (map #(str "-l" %) (conj libs "polyglot-mock"))
+                                   ["-shared" "-fPIC" "-D" "IS_POLYGLOT=1" "-o" (get-so-path opts)])]
+               (apply sh sh-opts))
+          
+          r2 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
+                                   (map #(str "-l" %) libs)
+                                   ["-shared" "-fPIC" "-o" (u/get-so-path-ni opts)])]
+               (apply sh sh-opts))]
+      (println "Compilation results:")
+      (println r1)
+      (println r2)
+      [r1 r2])))
 
 (defn persist-lib!
   [opts]

@@ -11,43 +11,7 @@
 
 (def lib-name 'bindings.ncurses)
 
-(def functions ["
-void  silly(char arg0) {
-  printf(\"%c\", arg0);
-}
-"
-                
-                "
-char* string(int size) {
-  char* s = (char*)malloc(sizeof(char) * size);
-  memset(s, 0, size);
-  return s;
-}
-"
-                
-                "
-int other_print_w(const void *value) {
-#if IS_POLYGLOT
-  if (polyglot_is_string(value)) {
-    int length = polyglot_get_string_size(value);
-    char str[length];
-    polyglot_as_string(value, str, length, \"UTF-8\");
-    return printw(str);
-  } else {
-    return printw(value);
-  }
-#else
-  return printw(value);
-#endif
-}
-"
-                
-                "
-char* append_char(char *str, int pos, char c) {
-  str[pos] = c;
-  return str;
-}
-"])
+(def functions [])
 
 (def prototypes
   ["void free(void *ptr);"
