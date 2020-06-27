@@ -1,6 +1,6 @@
 UNAME := $(shell uname)
 
-ifeq ($(UNAME_S), Linux)
+ifeq ($(UNAME), Linux)
 	OSFLAG = +linux
 endif
 
