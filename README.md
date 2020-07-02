@@ -39,6 +39,7 @@ I'd be very happy if you tried to use it and have questions. If you have a speci
 
 - Calling variadic C functions that do not have a `va_args` variation (see [printf](http://www.cplusplus.com/reference/cstdio/printf/?kw=printf) vs [vprintf](http://www.cplusplus.com/reference/cstdio/vprintf/))
   - If the function has a `va_args` variant, I'd recommend just using that for now
+- Sending pointer values to clojure functions doesn't work. This is because all clojure functions assume the arguments are Objects, which makes the ni compiler complain, with this message: `Expected Object but got Word for call argument`. Sadly there doesn't seem to be any practical way to tell clojure functions to accept Word-types. I've digged through deftype / gen-class and even tried modifying some of them, to no avail. The solution I came up with is wrapping all structs with Objects. This is fine in order to get things working, but I'm not sure how performant it is.
 
 If you know how to solve the problems below, please tell me how! :) Either through an issue, or [@Saikyun](https://twitter.com/Saikyun) on twitter.
 
