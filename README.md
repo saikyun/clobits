@@ -46,11 +46,9 @@ If you know how to solve the problems below, please tell me how! :) Either throu
 
 * graalvm -- tested with `graalvm-ce-java11-20.2.0-dev`: https://github.com/graalvm/graalvm-ce-dev-builds/releases
   * download, then add the following to e.g. .zprofile
-  * `export GRAALVM_HOME = "/path/to/graalvm-ce-java11-20.2.0-dev/Contents/Home/"`
-  * `export JAVA_HOME = $GRAALVM_HOME`
+  * `export GRAALVM_HOME="/path/to/graalvm-ce-java11-20.2.0-dev/Contents/Home/"`
 * install native-image: `$GRAALVM_HOME/bin/gu install native-image` (will be installed by `./compile` otherwise)
-* llvm toolchain -- https://www.graalvm.org/docs/reference-manual/languages/llvm/
-  * export LLVM_TOOLCHAIN as in the instructions
+* install llvm toolchain: `$GRAALVM_HOME/bin/gu install llvm-toolchain`
 * leiningen -- https://leiningen.org/
 
 Tested on macos and linux.
