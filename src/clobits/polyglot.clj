@@ -1,13 +1,13 @@
 (ns clobits.polyglot
   (:require [clojure.string :as str]
             [clobits.util :refer [add-prefix-to-sym create-subdirs! get-so-path]]
-            [clobits.clj-common :refer [gen-clojure-mapping get-type-throw convert-function-throw]]
+            [clobits.all-targets :refer [gen-clojure-mapping get-type-throw convert-function-throw]]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pp pprint]]))
 
 (defn struct-sym->interface-sym
   [lib-name sym]
-  (symbol (str lib-name "_poly." sym)))
+  (symbol (str lib-name "_structs.I" sym)))
 
 (defn attr->poly-method
   [types {:keys [sym] :as arg}]
@@ -90,7 +90,8 @@
                         (:require [clojure.java.io])
                         (:import org.graalvm.polyglot.Context
                                  org.graalvm.polyglot.Source
-                                 org.graalvm.polyglot.Value))
+                                 org.graalvm.polyglot.Value)
+                        (:gen-class))
                      `(def ~(symbol (str "^" {:private true})) ~'empty-array (object-array 0))]
                     [`(defn ~context-f-sym
                         []

@@ -20,6 +20,13 @@
    "WINDOW *initscr(void);"
    "int delwin(WINDOW *win);"
    "int endwin(void);"
+   "int noecho(void);"
+   "int curs_set(int visibility);"
+   "int mvprintw(int y, int x, char *fmt);"
+   "int clear(void);"
+   "int getmaxx(WINDOW *win);"
+   "int getmaxy(WINDOW *win);"
+   "void getmaxyx(WINDOW *win, int y, int x);"
    "int printw(char *);"
    "int refresh(void);"
    "int wrefresh(WINDOW *win);"])

@@ -35,6 +35,10 @@
         post-init-name (str post-init)
         factory-name (str factory)
         state-name (str state)
+        state-meta (meta state)
+        state-type ^Type (if-let [t (:tag state-meta)]
+                           (totype (resolve t))
+                           obj-type)
         main-name "main"
         var-name (fn [s] (clojure.lang.Compiler/munge (str s "__var")))
         class-type  (totype Class)
@@ -158,7 +162,7 @@
     (when state
       (. cv (visitField (+ (. Opcodes ACC_PUBLIC) (. Opcodes ACC_FINAL))
                         state-name 
-                        (. obj-type getDescriptor)
+                        (. state-type getDescriptor)
                         nil nil)))
     
                                         ;static init to set up var fields and load init
@@ -234,7 +238,7 @@
               (do
                 (. gen push (int 1))
                 (. gen (invokeStatic rt-type nth-method))
-                (. gen (putField ctype state-name obj-type)))
+                (. gen (putField ctype state-name state-type)))
               (. gen pop))
             
             (. gen goTo end-label)

@@ -1,4 +1,4 @@
-(ns clobits.clj-common
+(ns clobits.gen-clj
   "Functions that are used by both native-image and polyglot namespaces."
   (:require [clobits.util :refer [remove-prefixes snake->kebab]]))
 

@@ -20,19 +20,55 @@ int  _SHADOWING_delwin( WINDOW * win) {
 int  _SHADOWING_endwin() {
   return endwin();
 }
+int  _SHADOWING_noecho() {
+  return noecho();
+}
+int  _SHADOWING_curs_set( int  visibility) {
+  return curs_set(visibility);
+}
+int  _SHADOWING_mvprintw( int  y,  int  x,  char * fmt) {
+
+#if IS_POLYGLOT
+ char *fmt420;
+if (polyglot_is_string(fmt)) {
+ int length = polyglot_get_string_size(fmt);
+ char str[length + 1];
+ polyglot_as_string(fmt, str, length + 1, "ascii");
+ fmt420 = str;
+ } else {
+ fmt420 = fmt;
+ }
+   return mvprintw(y, x, fmt420);
+#else
+    return mvprintw(y, x, fmt);
+#endif
+
+}
+int  _SHADOWING_clear() {
+  return clear();
+}
+int  _SHADOWING_getmaxx( WINDOW * win) {
+  return getmaxx(win);
+}
+int  _SHADOWING_getmaxy( WINDOW * win) {
+  return getmaxy(win);
+}
+void  _SHADOWING_getmaxyx( WINDOW * win,  int  y,  int  x) {
+  getmaxyx(win, y, x);
+}
 int  _SHADOWING_printw( char * arg0) {
 
 #if IS_POLYGLOT
-char *arg0634;
+ char *arg0421;
 if (polyglot_is_string(arg0)) {
  int length = polyglot_get_string_size(arg0);
- char str[length];
- polyglot_as_string(arg0, str, length, "UTF-8");
- arg0634 = str;
+ char str[length + 1];
+ polyglot_as_string(arg0, str, length + 1, "ascii");
+ arg0421 = str;
  } else {
- arg0634 = arg0;
+ arg0421 = arg0;
  }
-   return printw(arg0634);
+   return printw(arg0421);
 #else
     return printw(arg0);
 #endif

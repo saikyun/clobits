@@ -4,8 +4,18 @@
   :source-paths ["src"]
   :jvm-opts []
   :resources ["src" "libs"]
+  :resource-paths ["classes"]
   
-  :profiles {:uberjar {:global-vars {*assert* false}
+  :profiles {:with-java {:java-source-paths ["java-src"]
+                         :aot :all}
+             
+             :compile-clobits {:aot [clobits.all-targets]
+                               :compile-path "classes/"}
+             
+             :compile-sdl {:aot [bindings.sdl-ns bindings.sdl-ni]
+                           :compile-path "classes/"}
+             
+             :uberjar {:global-vars {*assert* false}
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                   "-Dclojure.spec.skip-macros=true"]                           
                        :aot :all}
@@ -16,9 +26,14 @@
              :ncurses-uberjar {:main clobits.examples.ncurses.startup
                                :uberjar-name "examples_ncurses.jar"}
              
+             :bounce-uberjar {:main clobits.examples.ncurses.bounce-startup
+                              :uberjar-name "examples_bounce.jar"}
+             
              :sdl-poly {:main clobits.examples.sdl.startup}
              
              :ncurses-poly {:main clobits.examples.ncurses.startup}
+             
+             :bounce-poly {:main clobits.examples.ncurses.bounce-startup}
              
              
              :macos {:jvm-opts [;; sdl function regarding the window / renderer

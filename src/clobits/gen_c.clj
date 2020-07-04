@@ -25,13 +25,13 @@
   [args ret-f]
   (let [char-args (filter is-char*? args)
         new-syms (into {} (map #(vector (:sym %) (gensym (:sym %))) char-args))
-        declarations (map #(str "char *" (new-syms (:sym %)) ";") char-args)
+        declarations (map #(str (apply str (:prefixes %)) " char *" (new-syms (:sym %)) ";") char-args)
         setters (map #(let [new-sym (new-syms (:sym %))]
                         (str
                          "if (polyglot_is_string(" (:sym %) ")) {
  int length = polyglot_get_string_size(" (:sym %) ");
- char str[length];
- polyglot_as_string(" (:sym %) ", str, length, \"UTF-8\");
+ char str[length + 1];
+ polyglot_as_string(" (:sym %) ", str, length + 1, \"ascii\");
  " new-sym " = str;
  } else {
  " new-sym " = " (:sym %) ";

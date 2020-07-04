@@ -14,9 +14,8 @@
 (defn -main [& args]
   (let [w (ncurses/initscr)]
     
-    (let [yo "hej"]
-      (ncurses/printw (c/char* yo)))
-    (ncurses/refresh)
+    (ncurses/printw (c/char* "hello"))
+    (ncurses/curs-set 0)
     (Thread/sleep 1000)
     
     ;;(ncurses/delwin w)

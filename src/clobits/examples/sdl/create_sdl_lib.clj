@@ -83,11 +83,11 @@ int SDL_FillRect(SDL_Surface*    dst,
            nil 'char}
    "Uint32" 'int
    "Uint8" 'int
-   "SDL_Surface" 'bindings.sdl_ni.SDL_Surface
+   "SDL_Surface" 'bindings.sdl_ni_generated.SDL_Surface
    "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "SDL_Event" 'bindings.sdl_ni.SDL_Event
+   "SDL_Event" 'bindings.sdl_ni_generated.SDL_Event
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "SDL_PixelFormat" 'bindings.sdl_ni.SDL_PixelFormat})
+   "SDL_PixelFormat" 'bindings.sdl_ni_generated.SDL_PixelFormat})
 
 (def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl}) (vals structs)))
 
@@ -99,11 +99,11 @@ int SDL_FillRect(SDL_Surface*    dst,
            nil 'char}
    "Uint32" 'int
    "Uint8" 'int
-   "SDL_Surface" 'bindings.sdl_poly.SDL_Surface
+   "SDL_Surface" 'bindings.sdl_structs.ISDL_Surface
    "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "SDL_Event" 'bindings.sdl_poly.SDL_Event
+   "SDL_Event" 'bindings.sdl_structs.ISDL_Event
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "SDL_PixelFormat" 'bindings.sdl_poly.SDL_PixelFormat})
+   "SDL_PixelFormat" 'bindings.sdl_structs.ISDL_PixelFormat})
 
 (def poly-interfaces (map #(gp/struct->gen-interface poly-types % {:lib-name 'bindings.sdl}) (vals structs)))
 
@@ -142,6 +142,10 @@ int SDL_FillRect(SDL_Surface*    dst,
         opts (gp/gen-lib opts)
         opts (gp/persist-lib opts)
         opts (assoc opts :ni-code (ni/gen-lib opts))
+        opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class
+                                           types
+                                           %
+                                           {:lib-name 'bindings.sdl}) (vals structs)))
         opts (ni/persist-lib opts)]
     opts)
   

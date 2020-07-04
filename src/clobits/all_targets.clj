@@ -1,6 +1,9 @@
-(ns clobits.clj-common
+(ns clobits.all-targets
   "Functions that are used by both native-image and polyglot namespaces."
   (:require [clobits.util :refer [remove-prefixes snake->kebab]]))
+
+(definterface IWrapper
+  (^org.graalvm.word.PointerBase unwrap []))
 
 (defn gen-clojure-mapping
   "Takes proto data and creates a pair.

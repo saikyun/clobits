@@ -43,7 +43,17 @@
       str))
 
 (defmacro char*
+  "More efficient than `str*` but single arity."
   [s]
   (if *native-image*
     `(.get (CTypeConversion/toCString ~s))
     s))
+
+(defmacro str*
+  "Behaves like `clojure.core/str`.
+  Returns a char* or polyglot value depending on context."
+  ([& ss]
+   (let [s# `(apply str ~(into [] ss))]
+     (if *native-image*
+       `(.get (CTypeConversion/toCString ~s#))
+       s#))))
