@@ -154,6 +154,8 @@
     (println "Spitting h-code:" (apply str (take 100 h-code)) "...\n")
     (spit h-path h-code)
     
+    (println "Going to compile...")
+    
     (let [r1 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
                                    (map #(str "-l" %) (conj libs "polyglot-mock"))
                                    ["-shared" "-fPIC" "-D" "IS_POLYGLOT=1" "-o" (get-so-path opts)])]

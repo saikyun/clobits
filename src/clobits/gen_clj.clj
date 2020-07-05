@@ -25,18 +25,3 @@
                        {:prefixes ["SDL"]})
   ;;=> [init {:ret "int", :sym "SDL_Init", :args [{:type "Uint32", :sym "flags"}]}]
   )
-
-
-(defn get-type
-  [types {:keys [type pointer]}]
-  (if-let [t (types type)]
-    (if (symbol? t)
-      t
-      (get t pointer))
-    nil))
-
-(defn get-type-throw
-  [types t]
-  (if-let [t (get-type types t)]
-    t
-    (throw (Error. (str "No type defined for type: " t)))))

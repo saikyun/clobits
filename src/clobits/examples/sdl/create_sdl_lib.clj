@@ -3,6 +3,7 @@
             
             [clobits.parse-c :as pc] 
             
+            [clobits.all-targets :refer [get-type-throw]]
             [clobits.native-image :as ni]
             [clobits.polyglot :as gp]
             [clobits.gen-c :as gcee]
@@ -75,6 +76,9 @@ int SDL_FillRect(SDL_Surface*    dst,
                       :c-sym "SDL_PixelFormat"
                       :attrs [{:sym "palette" :type "void" :pointer "*"}]}})
 
+(def primitives
+  #{'int 'long 'char 'void})
+
 (def types
   {"void" {"*" 'org.graalvm.nativeimage.c.type.VoidPointer
            nil 'void}
@@ -88,6 +92,21 @@ int SDL_FillRect(SDL_Surface*    dst,
    "SDL_Event" 'bindings.sdl_ni_generated.SDL_Event
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
    "SDL_PixelFormat" 'bindings.sdl_ni_generated.SDL_PixelFormat})
+
+(def struct-wrappers
+  (into {}
+        (map (fn [{:keys [clj-sym c-sym]}]
+               (let [t (get-type-throw types {:type c-sym})]
+                 [t (symbol (str (ni/lib->package 'bindings.sdl)
+                                 "." (symbol (str "Wrap" clj-sym))))]))
+             (vals structs))))
+
+(def wrappers
+  (merge struct-wrappers
+         {'org.graalvm.nativeimage.c.type.VoidPointer
+          'WrapPointer
+          'org.graalvm.nativeimage.c.type.CCharPointer
+          'WrapPointer}))
 
 (def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl}) (vals structs)))
 
@@ -131,7 +150,9 @@ int SDL_FillRect(SDL_Surface*    dst,
               :includes ["stdio.h" "SDL2/SDL.h"]
               :append-clj poly-interfaces #_ protocols-and-extend
               :append-ni ni-interfaces
+              :primitives primitives
               :types types
+              :wrappers wrappers
               :poly-conversions conversion-functions
               :lib-name 'bindings.sdl
               :src-dir "src"
@@ -142,6 +163,7 @@ int SDL_FillRect(SDL_Surface*    dst,
         opts (gp/gen-lib opts)
         opts (gp/persist-lib opts)
         opts (assoc opts :ni-code (ni/gen-lib opts))
+        opts (assoc opts :wrapper-code (ni/gen-wrapper-ns opts))
         opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class
                                            types
                                            %
