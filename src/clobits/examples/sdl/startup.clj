@@ -2,7 +2,7 @@
 
 (ns clobits.examples.sdl.startup
   (:import #_Cool
-           WrapPointer
+           clobits.wrappers.WrapPointer
            [bindings.sdl_ni_generated
             WrapSDL_Event
             WrapSDL_PixelFormat           
@@ -64,13 +64,13 @@
         screen (sdl/get-window-surface window)
         rect (sdl/create-rect 0 0 100 50)]
     
-    (sdl/fill-rect screen rect (sdl/map-rgb (WrapSDL_PixelFormat. (.format screen)) 0xFF 0 0))
+    (sdl/fill-rect screen rect (sdl/map-rgb (.format screen) 0xFF 0 0))
     
     
     (sdl/update-window-surface window)
     
-    (println "rgb1" (sdl/map-rgb (WrapSDL_PixelFormat. (.format screen)) 0xFF 0xFF 0xFF))
-    (println "rgb2" (sdl/map-rgb (WrapSDL_PixelFormat. (.format screen)) 0xFF 0 0))
+    (println "rgb1" (sdl/map-rgb (.format screen) 0xFF 0xFF 0xFF))
+    (println "rgb2" (sdl/map-rgb (.format screen) 0xFF 0 0))
     
     (loop [quit false]
       (if (let [quit (when-not (= 0 (sdl/poll-event (sdl/get-e)))

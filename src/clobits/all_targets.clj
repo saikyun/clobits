@@ -5,6 +5,27 @@
 (definterface IWrapper
   (^org.graalvm.word.PointerBase unwrap []))
 
+#_(definterface IVoidPointer)
+
+(gen-interface
+ :name clobits.all_targets.IVoidPointerYE
+ :extends [])
+
+(gen-interface
+ :name clobits.all_targets.IVoidPointer
+ :extends [org.graalvm.nativeimage.c.type.VoidPointer
+           clobits.all_targets.IVoidPointerYE])
+
+(gen-interface
+ :name clobits.all_targets.IVoidPointerYE
+ :extends [])
+
+(gen-interface
+ :name clobits.all_targets.IVoidPointer
+ :extends [org.graalvm.nativeimage.c.type.VoidPointer
+           clobits.all_targets.IVoidPointerYE])
+
+
 (defn gen-clojure-mapping
   "Takes proto data and creates a pair.
   The key is a symbol looking like a clojure function name.

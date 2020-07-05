@@ -13,8 +13,8 @@ public class WrapSDL_PixelFormat implements ISDL_PixelFormat, IWrapper {
     return this.pointer;
   }
 
-  public org.graalvm.nativeimage.c.type.VoidPointer palette() {
-    return this.pointer.palette();
+  public clobits.wrappers.WrapVoid palette() {
+    return new clobits.wrappers.WrapVoid(this.pointer.palette());
   }
 
   public WrapSDL_PixelFormat(SDL_PixelFormat pointer) {

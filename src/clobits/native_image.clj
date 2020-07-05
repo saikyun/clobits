@@ -39,17 +39,22 @@
                      (into [])))))
 
 (defn gen-getter
-  [types {:keys [type sym] :as attr}]
-  (str "  public " (get-type-throw types attr) " " sym "() {
-    return this.pointer." sym "();
-  }"))
+  [types {:keys [type sym] :as attr} {:keys [wrappers]}]
+  (let [t (get-type-throw types attr)
+        w (wrappers t)]
+    (str "  public " (or w t) " " sym "() {
+    " (if w
+        (str "return new " w "(this.pointer." sym "());")
+        (str "return this.pointer." sym "();"))
+         "
+  }")))
 
 (defn struct->gen-wrapper-class
-  [types {:keys [c-sym clj-sym attrs] :as s} {:keys [lib-name]}]
+  [types {:keys [c-sym clj-sym attrs] :as s} {:keys [lib-name] :as opts}]
   (let [_ (println "s" s)
         _ (println "clj-sym" clj-sym)
         classname (str "Wrap" (java-friendly clj-sym))
-        funcs (str/join "\n\n" (map #(gen-getter types %) attrs))]
+        funcs (str/join "\n\n" (map #(gen-getter types % opts) attrs))]
     {:classname (str (lib->package lib-name) "." classname)
      :code (str ;; unused since same package.  "import " (sym->classname lib-name clj-sym) ";"
             "
@@ -77,27 +82,41 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
             )})
   )
 
-(comment
 
-  (def ttt {"void" {"*" 'org.graalvm.nativeimage.c.type.VoidPointer
-                    nil 'void}
-            "int" 'int
-            "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
-                    nil 'char}
-            "Uint32" 'int
-            "Uint8" 'int
-            "SDL_Surface" 'bindings.sdl_ni_generated.SDL_Surface
-            "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
-            "SDL_Event" 'bindings.sdl_ni_generated.SDL_Event
-            "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
-            "SDL_PixelFormat" 'bindings.sdl_ni_generated.SDL_PixelFormat})
-  
-  (println
-   (struct->gen-wrapper-class ttt {:clj-sym 'SDL_Event
-                                   :c-sym "SDL_Event"
-                                   :attrs [{:sym "type" :type "int"}]}
-                              {:lib-name 'bindings.sdl})
-   )
+
+(def ttt {"void" {"*" 'org.graalvm.nativeimage.c.type.VoidPointer
+                  nil 'void}
+          "int" 'int
+          "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
+                  nil 'char}
+          "Uint32" 'int
+          "Uint8" 'int
+          "SDL_Surface" 'bindings.sdl_ni_generated.SDL_Surface
+          "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
+          "SDL_Event" 'bindings.sdl_ni_generated.SDL_Event
+          "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
+          "SDL_PixelFormat" 'bindings.sdl_ni_generated.SDL_PixelFormat})
+
+(def example-wrappers
+  {'bindings.sdl_ni_generated.SDL_Event
+   'bindings.sdl_ni_generated.WrapSDL_Event,
+   'bindings.sdl_ni_generated.SDL_Surface
+   'bindings.sdl_ni_generated.WrapSDL_Surface,
+   'bindings.sdl_ni_generated.SDL_PixelFormat
+   'bindings.sdl_ni_generated.WrapSDL_PixelFormat})
+
+(println
+ 
+ 
+ (struct->gen-wrapper-class ttt {:clj-sym 'SDL_Surface
+                                 :c-sym "SDL_Surface"
+                                 :attrs [{:sym "format" :type "SDL_PixelFormat" :pointer "*"}]}
+                            {:lib-name 'bindings.sdl
+                             :wrappers example-wrappers
+                             })
+ )
+
+(comment
   
   (struct->gen-interface ttt {:clj-sym 'SDL_Event
                               :c-sym "SDL_Event"
@@ -228,7 +247,7 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
 (def example-wrappers
   (merge example-struct-wrappers
          {'org.graalvm.nativeimage.c.type.VoidPointer
-          'WrapPointer}))
+          'clobits.wrappers.WrapPointer}))
 
 
 
@@ -297,7 +316,8 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
 (defn gen-lib
   [{:keys [lib-name clojure-mappings append-ni] :as opts}]
   (concat [`(ns ~(symbol (str (name lib-name) "-ni"))
-              (:require [~'clobits.patch-gen-class])
+              (:require [~'clobits.patch-gen-class]
+                        [~'clobits.all-targets])
               (:import org.graalvm.word.PointerBase
                        org.graalvm.nativeimage.c.struct.CField
                        org.graalvm.nativeimage.c.CContext
@@ -308,6 +328,8 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
                        org.graalvm.nativeimage.c.struct.AllowWideningCast
                        org.graalvm.nativeimage.c.function.CFunction
                        org.graalvm.word.WordFactory
+                       
+                       clobits.all_targets.IVoidPointer
                        
                        [org.graalvm.nativeimage.c.type ~'CCharPointer ~'VoidPointer])
               (:gen-class))

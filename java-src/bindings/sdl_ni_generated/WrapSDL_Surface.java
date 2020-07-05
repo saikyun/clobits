@@ -13,8 +13,8 @@ public class WrapSDL_Surface implements ISDL_Surface, IWrapper {
     return this.pointer;
   }
 
-  public bindings.sdl_ni_generated.SDL_PixelFormat format() {
-    return this.pointer.format();
+  public bindings.sdl_ni_generated.WrapSDL_PixelFormat format() {
+    return new bindings.sdl_ni_generated.WrapSDL_PixelFormat(this.pointer.format());
   }
 
   public WrapSDL_Surface(SDL_Surface pointer) {

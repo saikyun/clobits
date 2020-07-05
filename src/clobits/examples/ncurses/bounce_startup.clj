@@ -7,7 +7,7 @@
             [clobits.c :as c]
             [clojure.pprint :refer [pprint]])
   (:import #_WrapVoid
-           WrapPointer
+           clobits.wrappers.WrapPointer
            org.graalvm.nativeimage.c.type.VoidPointer
            java.util.Vector)
   (:gen-class
@@ -37,8 +37,8 @@
   ([state]
    (merge state
           {:x 0, :y 0
-           :max-x (ncurses/getmaxx (WrapPointer/unwrap @win))
-           :max-y (ncurses/getmaxy (WrapPointer/unwrap @win))
+           :max-x (ncurses/getmaxx (.unwrap @win))
+           :max-y (ncurses/getmaxy (.unwrap @win))
            :dir 1})))
 
 (defn print-state!
@@ -71,8 +71,8 @@
                   (update state :dir -)
                   (update state :x + dir))]
       (-> state
-          (assoc :max-x (ncurses/getmaxx (WrapPointer/unwrap win)))
-          (assoc :max-y (ncurses/getmaxy (WrapPointer/unwrap win)))
+          (assoc :max-x (ncurses/getmaxx (.unwrap win)))
+          (assoc :max-y (ncurses/getmaxy (.unwrap win)))
           (assoc :y 0)))
     
     (catch Exception e

@@ -80,7 +80,7 @@ int SDL_FillRect(SDL_Surface*    dst,
   #{'int 'long 'char 'void})
 
 (def types
-  {"void" {"*" 'org.graalvm.nativeimage.c.type.VoidPointer
+  {"void" {"*" 'clobits.all_targets.IVoidPointer
            nil 'void}
    "int" 'int
    "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
@@ -103,15 +103,19 @@ int SDL_FillRect(SDL_Surface*    dst,
 
 (def wrappers
   (merge struct-wrappers
-         {'org.graalvm.nativeimage.c.type.VoidPointer
-          'WrapPointer
+         {'org.graalvm.nativeimage.c.type.VoidPointer 
+          'clobits.wrappers.WrapVoid
+          'clobits.all_targets.IVoidPointer
+          'clobits.wrappers.WrapVoid
+          'org.graalvm.word.PointerBase
+          'clobits.wrappers.WrapPointer
           'org.graalvm.nativeimage.c.type.CCharPointer
-          'WrapPointer}))
+          'clobits.wrappers.WrapPointer}))
 
 (def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl}) (vals structs)))
 
 (def poly-types
-  {"void" {"*" 'org.graalvm.nativeimage.c.type.VoidPointer
+  {"void" {"*" 'clobits.all_targets.IVoidPointerYE
            nil 'void}
    "int" 'int
    "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
@@ -130,6 +134,8 @@ int SDL_FillRect(SDL_Surface*    dst,
   {'int '.asInt
    'bindings.sdl_ni.SDL_PixelFormat 'identity
    'org.graalvm.nativeimage.c.type.VoidPointer 'identity
+   'org.graalvm.word.PointerBase 'identity
+   'clobits.all_targets.IVoidPointer 'identity
    
    'org.graalvm.nativeimage.c.type.CCharPointer 'identity #_ '.asString ;; constant char* can't be coerced into strings
    'void 'identity
@@ -167,7 +173,8 @@ int SDL_FillRect(SDL_Surface*    dst,
         opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class
                                            types
                                            %
-                                           {:lib-name 'bindings.sdl}) (vals structs)))
+                                           {:lib-name 'bindings.sdl
+                                            :wrappers wrappers}) (vals structs)))
         opts (ni/persist-lib opts)]
     opts)
   
