@@ -5,8 +5,7 @@
 (ns clobits.examples.ncurses.bounce-startup
   (:require [clobits.native-interop :refer [*native-image*]]
             [clobits.c :as c]
-            [clojure.pprint :refer [pprint]]
-            [wrappers.void-wrapper])
+            [clojure.pprint :refer [pprint]])
   (:import #_WrapVoid
            WrapPointer
            org.graalvm.nativeimage.c.type.VoidPointer
