@@ -1,14 +1,10 @@
 (ns clobits.native-image
   (:require [clobits.patch-gen-class :as pgc]
             [clojure.java.io :as io]
-            [clobits.all-targets :refer [gen-clojure-mapping get-type-throw]]
+            [clobits.all-targets :as at :refer [gen-clojure-mapping get-type-throw java-friendly]]
             [clobits.util :as u :refer [snake-case no-subdir]]
             [clojure.string :as str]
             [clojure.pprint :refer [pprint pp]]))
-
-(defn java-friendly
-  [sym]
-  (str/replace (name sym) "-" "_"))
 
 (defn lib->package
   [lib-name]
@@ -20,9 +16,16 @@
 
 (defn attr->method
   [types {:keys [sym] :as arg}]
-  [(with-meta (symbol sym)
-     {org.graalvm.nativeimage.c.struct.CField sym}) []
-   (get-type-throw types arg)])
+  [;; getter
+   [(with-meta (symbol sym)
+      {org.graalvm.nativeimage.c.struct.CField sym}) []
+    (get-type-throw types arg)]
+   
+   ;; setter
+   [(with-meta (symbol (str "set_" sym))
+      {org.graalvm.nativeimage.c.struct.CField sym})
+    [(get-type-throw types arg)]
+    'void]])
 
 (defn struct->gen-interface
   [types {:keys [c-sym clj-sym attrs]} {:keys [lib-name]}]
@@ -36,6 +39,7 @@
       :extends [org.graalvm.word.PointerBase
                 ~(symbol (str java-friendly-lib-name "_structs.I" (java-friendly clj-sym)))]
       :methods ~(->> (map #(attr->method types %) attrs)
+                     (apply concat)
                      (into [])))))
 
 (defn gen-getter
@@ -49,21 +53,44 @@
          "
   }")))
 
+(defn gen-setters
+  [types {:keys [type sym] :as attr} {:keys [lib-name wrappers]}]
+  (let [t (get-type-throw types attr)
+        w (wrappers t)]
+    (if w
+      (str (str "  public void set_" sym "(" (or w t) " v) {
+    " (str "this.pointer.set_" sym "(v.unwrap());")
+                "
+  }\n\n")
+           
+           (str "  public void set_" sym "(" (at/struct-sym->interface-sym lib-name type) " v) {
+    " (str "this.pointer.set_" sym "(v);")
+                "
+  }"))
+
+      
+      
+      (str "  public void set_" sym "(" (or w t) " v) {
+    " (str "this.pointer.set_" sym "(v);")
+           "
+  }")
+      
+      )))
+
 (defn struct->gen-wrapper-class
   [types {:keys [c-sym clj-sym attrs] :as s} {:keys [lib-name] :as opts}]
-  (let [_ (println "s" s)
-        _ (println "clj-sym" clj-sym)
-        classname (str "Wrap" (java-friendly clj-sym))
-        funcs (str/join "\n\n" (map #(gen-getter types % opts) attrs))]
+  (let [classname (str "Wrap" (java-friendly clj-sym))
+        funcs (str/join "\n\n" (concat (map #(gen-getter types % opts) attrs)
+                                       (map #(gen-setters types % opts) attrs)))]
     {:classname (str (lib->package lib-name) "." classname)
      :code (str ;; unused since same package.  "import " (sym->classname lib-name clj-sym) ";"
             "
 package " (lib->package lib-name) ";
 
 import " lib-name "_structs.I" (java-friendly clj-sym) ";
-import clobits.all_targets.IWrapper;
+import clobits.all_targets.IWrapperNI;
 
-public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
+public class " classname " implements I" (java-friendly clj-sym) ", IWrapperNI {
   " (java-friendly clj-sym) " pointer;
 
   // used when sending data to native functions
@@ -163,7 +190,7 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
                                                   t
                                                   (symbol (str/upper-case (str t))))
                                                 
-                                                :else 'clobits.all_targets.IWrapper))
+                                                :else 'clobits.all_targets.IWrapperNI))
                                 :arg-symbol (-> arg :sym symbol)}) args))
         ret {:wrapper (let [t (get-type-throw types {:type ret :pointer pointer})]
                         (cond
@@ -307,7 +334,7 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapper {
   [{:keys [lib-name clojure-mappings wrappers] :as opts}]
   (concat [`(ns ~(symbol (str (name lib-name) "-wrapper"))
               ~(conj (into '() (into #{} (vals wrappers)))
-                     'clobits.all_targets.IWrapper
+                     'clobits.all_targets.IWrapperNI
                      :import)
               (:gen-class))]
           (map #(gen-defn % opts) clojure-mappings)))

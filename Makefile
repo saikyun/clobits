@@ -32,7 +32,11 @@ ncurses-bindings:
 bindings: sdl-bindings ncurses-bindings
 
 sdl-poly: bindings
-	lein with-profiles $(OSFLAG),+sdl-poly do clean, run
+	lein with-profiles $(OSFLAG),+sdl-poly,+socket do clean, run
+
+sp:
+	lein with-profiles $(OSFLAG),+sdl-poly,+socket do clean, run
+
 
 ncurses-poly: bindings
 	lein with-profiles $(OSFLAG),+ncurses-poly do clean, run

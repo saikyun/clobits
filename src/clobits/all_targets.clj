@@ -1,9 +1,23 @@
 (ns clobits.all-targets
   "Functions that are used by both native-image and polyglot namespaces."
-  (:require [clobits.util :refer [remove-prefixes snake->kebab]]))
+  (:require [clojure.string :as str]
+            [clobits.util :refer [remove-prefixes snake->kebab]]))
+
+(defn struct-sym->interface-sym
+  [lib-name sym]
+  (symbol (str lib-name "_structs.I" sym)))
+
+(defn java-friendly
+  [sym]
+  (str/replace (name sym) "-" "_"))
 
 (definterface IWrapper
-  (^org.graalvm.word.PointerBase unwrap []))
+  (unwrap []))
+
+(gen-interface
+ :name clobits.all_targets.IWrapperNI
+ :extends [clobits.all_targets.IWrapper]
+ :methods [[unwrap [] org.graalvm.word.PointerBase]])
 
 #_(definterface IVoidPointer)
 

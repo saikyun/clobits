@@ -1,17 +1,15 @@
 (ns clobits.polyglot
   (:require [clojure.string :as str]
             [clobits.util :refer [add-prefix-to-sym create-subdirs! get-so-path]]
-            [clobits.all-targets :refer [gen-clojure-mapping get-type-throw convert-function-throw]]
+            [clobits.all-targets :refer [gen-clojure-mapping get-type-throw convert-function-throw
+                                         struct-sym->interface-sym java-friendly]]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pp pprint]]))
 
-(defn struct-sym->interface-sym
-  [lib-name sym]
-  (symbol (str lib-name "_structs.I" sym)))
-
 (defn attr->poly-method
   [types {:keys [sym] :as arg}]
-  [(symbol sym) [] (get-type-throw types arg)])
+  [[(symbol sym) [] (get-type-throw types arg)]
+   [(symbol (str "set_" sym)) [(get-type-throw types arg)] 'void]])
 
 (defn struct->gen-interface
   [types {:keys [clj-sym attrs]} {:keys [lib-name]}]
@@ -22,10 +20,11 @@
       ~(symbol (struct-sym->interface-sym lib-name clj-sym))
       
       :methods ~(->> (map #(attr->poly-method types %) attrs)
+                     (apply concat)
                      (into [])))))
 
-(defn gen-defn
-  "Takes kv pair, where k is a clojure symbol and v is proto data.
+#_(defn gen-defn
+    "Takes kv pair, where k is a clojure symbol and v is proto data.
   Generates `defn`-calls.
   Needs `{:lib-sym ...}` as second argument.
   This should be a symbol declared above the defn-call, which contains a polyglot library.
@@ -37,37 +36,183 @@
    [(def init1687 (.getMember sdl-sym \"SDL_Init\"))
     (clojure.core/defn init ([flags] (.execute init1687 (clojure.core/object-array [flags]))))]
   ```"
-  [[f-sym {:keys [ret pointer sym args]}] {:keys [types poly-conversions lib-name lib-sym structs]}]
+    [[f-sym {:keys [ret pointer sym args]}] {:keys [types poly-conversions lib-name lib-sym structs]}]
+    (let [f (if (= ret "void")
+              '.executeVoid
+              '.execute)
+          f-gensym (gensym f-sym)
+          ret-struct (get structs ret)
+          conv-func (when-not ret-struct
+                      (convert-function-throw poly-conversions
+                                              (get-type-throw types {:type ret
+                                                                     :pointer pointer})))
+          wrap-cast (fn [body] (if ret-struct
+                                 `(~'.as ~body ~(struct-sym->interface-sym lib-name (:clj-sym ret-struct)))
+                                 body))
+          wrap-convert (fn [body]
+                         (if (and conv-func (not= conv-func 'identity))
+                           `(-> ~body ~conv-func)
+                           body))]
+      `[(def ~(symbol (str "^" {:private true})) ~f-gensym (.getMember ~lib-sym ~sym))
+        (defn ~f-sym
+          ~(if-let [as (seq (->> args
+                                 (map-indexed #(or (:sym %2)
+                                                   (str "arg" %1)))
+                                 (map symbol)))]
+             `(~(into [] as)
+               ~(-> `(~f ~f-gensym (object-array ~(into [] as)))
+                    wrap-cast
+                    wrap-convert))
+             `([]
+               ~(-> `(~f ~f-gensym ~'empty-array)
+                    wrap-cast
+                    wrap-convert))))]))
+
+#_(defn gen-defn
+    [[f-sym {:keys [ret pointer sym args]}] {:keys [types poly-conversions lib-name lib-sym structs]}]
+    (let [f (if (= ret "void")
+              '.executeVoid
+              '.execute) 
+          f-gensym (gensym f-sym)
+          ret-struct (get structs ret)
+          conv-func (when-not ret-struct
+                      (convert-function-throw poly-conversions
+                                              (get-type-throw types {:type ret
+                                                                     :pointer pointer})))
+          wrap-cast (fn [body] (if ret-struct
+                                 `(~'.as ~body ~(struct-sym->interface-sym lib-name (:clj-sym ret-struct)))
+                                 body))
+          
+          wrap-reify (fn [body] 
+                       (if ret-struct
+                         (let [value-sym (gensym "value")
+                               struct-interface (struct-sym->interface-sym lib-name (:clj-sym ret-struct))]
+                           `(let [~value-sym ~body]
+                              ~(concat
+                                `(reify
+                                   ~struct-interface)
+                                
+                                (->> (for [{:keys [sym type] :as attr} (:attrs ret-struct)
+                                           :let [intf (struct-sym->interface-sym lib-name type)]]
+                                       [`(~(symbol sym) [~'_]
+                                          ~(if (get structs type)
+                                             `(~'.as (~'.getMember ~value-sym ~sym)
+                                               ~intf)
+                                             `(~'.getMember ~value-sym ~sym)))
+                                        
+                                        `(~(symbol (str "set_" sym)) [~'_ v#]
+                                          (~'.putMember ~value-sym ~sym v#))])
+                                     (apply concat))
+                                
+                                `(~'clobits.all_targets.IWrapper
+                                  (~'unwrap [~'_]
+                                   (~'.as ~value-sym ~struct-interface))))))
+                         body))
+          
+          wrap-convert (fn [body]
+                         (if (and conv-func (not= conv-func 'identity))
+                           `(-> ~body ~conv-func)
+                           body))]
+      `[(def ~(symbol (str "^" {:private true})) ~f-gensym (.getMember ~lib-sym ~sym))
+        (defn ~f-sym
+          ~(if-let [as (seq (->> args
+                                 (map-indexed #(or (:sym %2)
+                                                   (str "arg" %1)))
+                                 (map symbol)))]
+             `(~(into [] as)
+               ~(-> `(~f ~f-gensym (object-array ~(into [] as)))
+                    wrap-reify
+                    wrap-convert))
+             `([]
+               ~(-> `(~f ~f-gensym ~'empty-array)
+                    wrap-reify
+                    wrap-convert))))]))
+
+(defn gen-defn
+  "Generates a defn-call, which calls a method.
+  The function resulting from evaluating the defn-call will wrap / unwrap native values / wrappers as needed."
+  [[f-sym {:keys [ret pointer sym args] :as func}]
+   {:keys [types primitives lib-name poly-wrappers poly-conversions lib-sym]}]
   (let [f (if (= ret "void")
             '.executeVoid
-            '.execute)
+            '.execute) 
         f-gensym (gensym f-sym)
-        ret-struct (get structs ret)
-        conv-func (when-not ret-struct
+        
+        param-primitives (>= 4 (count args))
+        params (into [] (map (fn [arg]
+                               {:unwrap (let [t (get-type-throw types arg)]
+                                          (cond
+                                            (= 'int (get primitives t))
+                                            'int
+                                            
+                                            (not (get primitives t)) '.unwrap))
+                                :annotation (let [t (get-type-throw types arg)]
+                                              (cond
+                                                (= 'int (get primitives t))
+                                                (if param-primitives
+                                                  'long
+                                                  'Long)
+                                                
+                                                (get primitives t)
+                                                (if param-primitives
+                                                  t
+                                                  (symbol (str/upper-case (str t))))
+                                                
+                                                :else 'clobits.all_targets.IWrapper))
+                                :arg-symbol
+                                (-> arg :sym symbol)}) 
+                             (map-indexed (fn [i arg] (update arg :sym #(or % (str "arg" i)))) args)))
+        
+        ret-meta {:wrapper (let [t (get-type-throw types {:type ret :pointer pointer})]
+                             (when-not (get primitives t)
+                               (when-let [w (get poly-wrappers t)]
+                                 (if (map? w) (:create w) w))))
+                  :annotation (let [t (get-type-throw types {:type ret :pointer pointer})]
+                                (cond
+                                  (= 'int (get primitives t))
+                                  'long
+                                  
+                                  (#{'double 'long} (get primitives t)) ;; only primitives annotateable
+                                  t
+                                  
+                                  :else
+                                  (when-let [w (get poly-wrappers t)]
+                                    (if (map? w) (:type w) w))))}
+        
+        conv-func (when-not (:wrapper ret-meta)
                     (convert-function-throw poly-conversions
                                             (get-type-throw types {:type ret
-                                                                   :pointer pointer})))
-        wrap-cast (fn [body] (if ret-struct
-                               `(~'.as ~body ~(struct-sym->interface-sym lib-name (:clj-sym ret-struct)))
-                               body))
+                                                                   :pointer pointer})))                
+        
         wrap-convert (fn [body]
                        (if (and conv-func (not= conv-func 'identity))
                          `(-> ~body ~conv-func)
                          body))]
-    `[(def ~(symbol (str "^" {:private true})) ~f-gensym (.getMember ~lib-sym ~sym))
-      (defn ~f-sym
-        ~(if-let [as (seq (->> args
-                               (map-indexed #(or (:sym %2)
-                                                 (str "arg" %1)))
-                               (map symbol)))]
-           `(~(into [] as)
-             ~(-> `(~f ~f-gensym (object-array ~(into [] as)))
-                  wrap-cast
-                  wrap-convert))
-           `([]
-             ~(-> `(~f ~f-gensym ~'empty-array)
-                  wrap-cast
-                  wrap-convert))))]))
+    [`(def ~(symbol (str "^" {:private true})) ~f-gensym (.getMember ~lib-sym ~sym))
+     `(defn ~f-sym
+        ~(str "Ret: " ret-meta) ;; this docstring is just for fun
+        ~(if-let [a (:annotation ret-meta)]
+           (symbol (str "^" a))
+           (symbol "") ;; please forgive me (no annotation on return value)
+           )
+        ~(->> params
+              (map (fn [{:keys [arg-symbol annotation]}]
+                     [(when annotation
+                        (symbol (str "^" annotation)))
+                      arg-symbol]))
+              flatten
+              (into []))
+        ~(let [call `(~f ~f-gensym (object-array ~(into []
+                                                        (map (fn [{:keys [unwrap arg-symbol]}]
+                                                               (if unwrap
+                                                                 (list unwrap arg-symbol)
+                                                                 arg-symbol))
+                                                             params))))]
+           (-> (if-let [w (:wrapper ret-meta)]
+                 `(~w ~call) ;;  not function anymore             
+                 
+                 call)
+               wrap-convert)))]))
 
 (comment
   (-> (gen-clojure-mapping {:ret "int", :sym "SDL_Init", :args [{:type "Uint32", :sym "flags"}]}

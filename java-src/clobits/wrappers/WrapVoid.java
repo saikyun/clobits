@@ -2,11 +2,11 @@ package clobits.wrappers;
 
 import org.graalvm.nativeimage.c.type.VoidPointer;
 import org.graalvm.word.ComparableWord;
-import clobits.all_targets.IWrapper;
+import clobits.all_targets.IWrapperNI;
 import clobits.all_targets.IVoidPointer;
 import clobits.all_targets.IVoidPointerYE;
 
-public class WrapVoid implements IVoidPointerYE, IWrapper {
+public class WrapVoid implements IVoidPointerYE, IWrapperNI {
     IVoidPointer pointer;
     
     public boolean isNonNull() {
@@ -33,7 +33,7 @@ public class WrapVoid implements IVoidPointerYE, IWrapper {
       this.pointer = p;
     }
 
-    public VoidPointer unwrap() {
+    public IVoidPointer unwrap() {
       return this.pointer;
     }
 }

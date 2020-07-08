@@ -7,7 +7,7 @@
 (defn snake->kebab
   "Turns snake casing to kebab-casing -- i.e. how clojure functions look"
   [s]
-  (-> s
+  (-> (name s)
       (str/replace #"^_" "")
       (str/replace #"(?!^)_" "-")
       (str/replace #"(?!^)([a-z][A-Z])" #(str (apply str (butlast (first %1))) "-" (second (second %1))))

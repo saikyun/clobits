@@ -3,12 +3,15 @@
             
             [clobits.parse-c :as pc] 
             
-            [clobits.all-targets :refer [get-type-throw]]
+            [clobits.all-targets :as at :refer [get-type-throw]]
+            [clobits.util :as u]
             [clobits.native-image :as ni]
             [clobits.polyglot :as gp]
             [clobits.gen-c :as gcee]
             
             [clojure.pprint :refer [pp pprint]]))
+
+(def lib-name 'bindings.sdl)
 
 (def functions
   ["int GET_SDL_INIT_VIDEO() { return SDL_INIT_VIDEO; }"
@@ -74,7 +77,13 @@ int SDL_FillRect(SDL_Surface*    dst,
                   :attrs [{:sym "format" :type "SDL_PixelFormat" :pointer "*"}]}
    "SDL_PixelFormat" {:clj-sym 'SDL_PixelFormat
                       :c-sym "SDL_PixelFormat"
-                      :attrs [{:sym "palette" :type "void" :pointer "*"}]}})
+                      :attrs [{:sym "palette" :type "void" :pointer "*"}]}
+   "SDL_Rect" {:clj-sym 'SDL_Rect
+               :c-sym "SDL_Rect"
+               :attrs [{:sym "x" :type "Sint16"}
+                       {:sym "y" :type "Sint16"}
+                       {:sym "w" :type "Uint16"}
+                       {:sym "h" :type "Uint16"}]}})
 
 (def primitives
   #{'int 'long 'char 'void})
@@ -86,6 +95,8 @@ int SDL_FillRect(SDL_Surface*    dst,
    "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
            nil 'char}
    "Uint32" 'int
+   "Uint16" 'int
+   "Sint16" 'int
    "Uint8" 'int
    "SDL_Surface" 'bindings.sdl_ni_generated.SDL_Surface
    "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
@@ -112,23 +123,21 @@ int SDL_FillRect(SDL_Surface*    dst,
           'org.graalvm.nativeimage.c.type.CCharPointer
           'clobits.wrappers.WrapPointer}))
 
-(def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl}) (vals structs)))
+(declare poly-wrappers)
 
-(def poly-types
-  {"void" {"*" 'clobits.all_targets.IVoidPointerYE
-           nil 'void}
-   "int" 'int
-   "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
-           nil 'char}
-   "Uint32" 'int
-   "Uint8" 'int
-   "SDL_Surface" 'bindings.sdl_structs.ISDL_Surface
-   "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "SDL_Event" 'bindings.sdl_structs.ISDL_Event
-   "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "SDL_PixelFormat" 'bindings.sdl_structs.ISDL_PixelFormat})
-
-(def poly-interfaces (map #(gp/struct->gen-interface poly-types % {:lib-name 'bindings.sdl}) (vals structs)))
+(def poly-wrappers
+  (merge (->> (map (fn [{:keys [clj-sym c-sym]}]
+                     [(get-type-throw types {:type c-sym})
+                      {:create (symbol (str "wrap-" (u/snake->kebab clj-sym)))
+                       :type nil}])
+                   (vals structs))
+              (into {}))
+         {'org.graalvm.nativeimage.c.type.CCharPointer
+          {:create 'wrap-pointer :type nil}
+          'org.graalvm.nativeimage.c.type.VoidPointer
+          {:create 'wrap-pointer :type nil}
+          'clobits.all_targets.IVoidPointer
+          {:create 'wrap-pointer :type nil}}))
 
 (def conversion-functions
   {'int '.asInt
@@ -140,6 +149,73 @@ int SDL_FillRect(SDL_Surface*    dst,
    'org.graalvm.nativeimage.c.type.CCharPointer 'identity #_ '.asString ;; constant char* can't be coerced into strings
    'void 'identity
    'char `(~'.as Character)})
+
+(def constructors
+  (concat
+   [(conj (map #(if (map? %) (:create %) %) (into #{} (vals poly-wrappers))) `declare)]
+   (map (fn [{:keys [clj-sym attrs]}]
+          (let [value-sym 'value
+                struct-interface (at/struct-sym->interface-sym lib-name clj-sym)]
+            `(defn ~(symbol (str "wrap-" (u/snake->kebab clj-sym))) [~value-sym]
+               ~(concat
+                 `(reify
+                    ~struct-interface)
+                 
+                 (->> (for [{:keys [sym type] :as attr} attrs
+                            :let [t (get-type-throw types attr)
+                                  conv-func (when-not (poly-wrappers t)
+                                              (at/convert-function-throw 
+                                               conversion-functions
+                                               (get-type-throw types attr)))
+                                  wrap-convert (fn [body]
+                                                 (if (and conv-func (not= conv-func 'identity))
+                                                   `(-> ~body ~conv-func)
+                                                   body))
+                                  intf (at/struct-sym->interface-sym lib-name type)]]
+                        [`(~(symbol sym) [~'_]
+                           ~(-> (if-let [w (poly-wrappers t)]
+                                  `(~(if (map? w) (:create w) w)
+                                    (~'.getMember ~value-sym ~sym))
+                                  `(~'.getMember ~value-sym ~sym))
+                                wrap-convert))
+                         
+                         `(~(symbol (str "set_" sym)) [~'_ ~'v]
+                           ~(if (poly-wrappers t)
+                              `(~'.putMember ~value-sym ~sym (~'.unwrap ~'v))
+                              `(~'.putMember ~value-sym ~sym ~'v)))])
+                      (apply concat))
+                 
+                 `(~'clobits.all_targets.IWrapper
+                   (~'unwrap [~'_]
+                    (~'.as ~value-sym ~struct-interface)))))))
+        (vals structs))
+   
+   [(let [value-sym 'value]
+      `(defn ~(symbol "wrap-pointer") [~value-sym]
+         (reify
+           ~'clobits.all_targets.IWrapper
+           (~'unwrap [~'_]
+            ~value-sym))))]))
+
+(def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl}) (vals structs)))
+
+(def poly-types
+  {"void" {"*" 'clobits.all_targets.IVoidPointerYE
+           nil 'void}
+   "int" 'int
+   "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
+           nil 'char}
+   "Uint32" 'int
+   "Uint16" 'int
+   "Sint16" 'int
+   "Uint8" 'int
+   "SDL_Surface" 'bindings.sdl_structs.ISDL_Surface
+   "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
+   "SDL_Event" 'bindings.sdl_structs.ISDL_Event
+   "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
+   "SDL_PixelFormat" 'bindings.sdl_structs.ISDL_PixelFormat})
+
+(def poly-interfaces (map #(gp/struct->gen-interface poly-types % {:lib-name 'bindings.sdl}) (vals structs)))
 
 (defn -main
   []
@@ -154,13 +230,15 @@ int SDL_FillRect(SDL_Surface*    dst,
                               )
               :structs structs
               :includes ["stdio.h" "SDL2/SDL.h"]
-              :append-clj poly-interfaces #_ protocols-and-extend
+              :append-clj (concat poly-interfaces
+                                  constructors)
               :append-ni ni-interfaces
               :primitives primitives
               :types types
               :wrappers wrappers
+              :poly-wrappers poly-wrappers
               :poly-conversions conversion-functions
-              :lib-name 'bindings.sdl
+              :lib-name lib-name
               :src-dir "src"
               :lib-dir "libs"
               :libs ["SDL2"]}

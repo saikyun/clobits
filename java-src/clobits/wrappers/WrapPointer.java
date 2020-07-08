@@ -2,9 +2,9 @@ package clobits.wrappers;
 
 import org.graalvm.word.PointerBase;
 import org.graalvm.word.ComparableWord;
-import clobits.all_targets.IWrapper;
+import clobits.all_targets.IWrapperNI;
 
-public class WrapPointer implements IWrapper {
+public class WrapPointer implements IWrapperNI {
     PointerBase pointer;
 
     public boolean isNonNull() {
