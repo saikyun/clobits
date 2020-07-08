@@ -2,7 +2,7 @@
 (clojure.core/ns
  bindings.sdl-wrapper
  (:import
-  clobits.all_targets.IWrapper
+  clobits.all_targets.IWrapperNI
   bindings.sdl_ni_generated.WrapSDL_Surface
   bindings.sdl_ni_generated.WrapSDL_Event
   clobits.wrappers.WrapPointer
@@ -64,7 +64,7 @@
  poll-event
  "Ret: {:wrapper long, :annotation long}"
  ^long
- [^clobits.all_targets.IWrapper event]
+ [^clobits.all_targets.IWrapperNI event]
  (long (bindings.sdl/poll-event (.unwrap event))))
 
 (clojure.core/defn
@@ -78,14 +78,14 @@
  update-window-surface
  "Ret: {:wrapper long, :annotation long}"
  ^long
- [^clobits.all_targets.IWrapper window]
+ [^clobits.all_targets.IWrapperNI window]
  (long (bindings.sdl/update-window-surface (.unwrap window))))
 
 (clojure.core/defn
  get-window-surface
  "Ret: {:wrapper bindings.sdl_ni_generated.WrapSDL_Surface., :annotation bindings.sdl_ni_generated.WrapSDL_Surface}"
  ^bindings.sdl_ni_generated.WrapSDL_Surface
- [^clobits.all_targets.IWrapper window]
+ [^clobits.all_targets.IWrapperNI window]
  (bindings.sdl_ni_generated.WrapSDL_Surface.
   (bindings.sdl/get-window-surface (.unwrap window))))
 
@@ -93,14 +93,14 @@
  map-rgb
  "Ret: {:wrapper long, :annotation long}"
  ^long
- [^clobits.all_targets.IWrapper format ^long r ^long g ^long b]
+ [^clobits.all_targets.IWrapperNI format ^long r ^long g ^long b]
  (long (bindings.sdl/map-rgb (.unwrap format) (int r) (int g) (int b))))
 
 (clojure.core/defn
  create-window
  "Ret: {:wrapper clobits.wrappers.WrapVoid., :annotation clobits.wrappers.WrapVoid}"
  ^clobits.wrappers.WrapVoid
- [^clobits.all_targets.IWrapper
+ [^clobits.all_targets.IWrapperNI
   title
   ^Long
   x
@@ -125,9 +125,9 @@
  fill-rect
  "Ret: {:wrapper long, :annotation long}"
  ^long
- [^clobits.all_targets.IWrapper
+ [^clobits.all_targets.IWrapperNI
   dst
-  ^clobits.all_targets.IWrapper
+  ^clobits.all_targets.IWrapperNI
   rect
   ^long
   color]

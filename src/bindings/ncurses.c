@@ -29,16 +29,16 @@ int  _SHADOWING_curs_set( int  visibility) {
 int  _SHADOWING_mvprintw( int  y,  int  x,  char * fmt) {
 
 #if IS_POLYGLOT
- char *fmt420;
+ char *fmt493;
 if (polyglot_is_string(fmt)) {
  int length = polyglot_get_string_size(fmt);
  char str[length + 1];
  polyglot_as_string(fmt, str, length + 1, "ascii");
- fmt420 = str;
+ fmt493 = str;
  } else {
- fmt420 = fmt;
+ fmt493 = fmt;
  }
-   return mvprintw(y, x, fmt420);
+   return mvprintw(y, x, fmt493);
 #else
     return mvprintw(y, x, fmt);
 #endif
@@ -59,16 +59,16 @@ void  _SHADOWING_getmaxyx( WINDOW * win,  int  y,  int  x) {
 int  _SHADOWING_printw( char * arg0) {
 
 #if IS_POLYGLOT
- char *arg0421;
+ char *arg0494;
 if (polyglot_is_string(arg0)) {
  int length = polyglot_get_string_size(arg0);
  char str[length + 1];
  polyglot_as_string(arg0, str, length + 1, "ascii");
- arg0421 = str;
+ arg0494 = str;
  } else {
- arg0421 = arg0;
+ arg0494 = arg0;
  }
-   return printw(arg0421);
+   return printw(arg0494);
 #else
     return printw(arg0);
 #endif

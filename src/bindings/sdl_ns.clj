@@ -11,7 +11,7 @@
 (def ^{:private true} empty-array (clojure.core/object-array 0))
 
 (clojure.core/defn
- context-f476
+ context-f538
  []
  (clojure.core/->
   (org.graalvm.polyglot.Context/newBuilder
@@ -21,7 +21,7 @@
 
 (clojure.core/defn
  ^{:private true}
- source-f477
+ source-f539
  []
  (clojure.core/->
   (org.graalvm.polyglot.Source/newBuilder
@@ -32,192 +32,332 @@
     "libs/libbindings$sdl.so"))
   (.build)))
 
-(def polyglot-context (context-f476))
+(def polyglot-context (context-f538))
 
-(def polyglot-lib (.eval polyglot-context (source-f477)))
+(def polyglot-lib (.eval polyglot-context (source-f539)))
 
 (clojure.core/gen-interface
  :name
  ^{org.graalvm.polyglot.HostAccess$Implementable true}
  bindings.sdl_structs.ISDL_Event
  :methods
- [[type [] int]])
+ [[type [] int] [set_type [int] void]])
 
 (clojure.core/gen-interface
  :name
  ^{org.graalvm.polyglot.HostAccess$Implementable true}
  bindings.sdl_structs.ISDL_Surface
  :methods
- [[format [] bindings.sdl_structs.ISDL_PixelFormat]])
+ [[format [] bindings.sdl_structs.ISDL_PixelFormat]
+  [set_format [bindings.sdl_structs.ISDL_PixelFormat] void]])
 
 (clojure.core/gen-interface
  :name
  ^{org.graalvm.polyglot.HostAccess$Implementable true}
  bindings.sdl_structs.ISDL_PixelFormat
  :methods
- [[palette [] clobits.all_targets.IVoidPointerYE]])
+ [[palette [] clobits.all_targets.IVoidPointerYE]
+  [set_palette [clobits.all_targets.IVoidPointerYE] void]])
+
+(clojure.core/gen-interface
+ :name
+ ^{org.graalvm.polyglot.HostAccess$Implementable true}
+ bindings.sdl_structs.ISDL_Rect
+ :methods
+ [[x [] int]
+  [set_x [int] void]
+  [y [] int]
+  [set_y [int] void]
+  [w [] int]
+  [set_w [int] void]
+  [h [] int]
+  [set_h [int] void]])
+
+(clojure.core/declare
+ wrap-sdl-event
+ wrap-pointer
+ wrap-sdl-pixel-format
+ wrap-sdl-surface)
+
+(clojure.core/defn
+ wrap-sdl-event
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_Event
+  (type [_] (clojure.core/-> (.getMember value "type") .asInt))
+  (set_type [_ v] (.putMember value "type" v))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Event))))
+
+(clojure.core/defn
+ wrap-sdl-surface
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_Surface
+  (format [_] (wrap-sdl-pixel-format (.getMember value "format")))
+  (set_format [_ v] (.putMember value "format" (.unwrap v)))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Surface))))
+
+(clojure.core/defn
+ wrap-sdl-pixel-format
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_PixelFormat
+  (palette [_] (wrap-pointer (.getMember value "palette")))
+  (set_palette [_ v] (.putMember value "palette" (.unwrap v)))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_PixelFormat))))
+
+(clojure.core/defn
+ wrap-sdl-rect
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_Rect
+  (x [_] (clojure.core/-> (.getMember value "x") .asInt))
+  (set_x [_ v] (.putMember value "x" v))
+  (y [_] (clojure.core/-> (.getMember value "y") .asInt))
+  (set_y [_ v] (.putMember value "y" v))
+  (w [_] (clojure.core/-> (.getMember value "w") .asInt))
+  (set_w [_ v] (.putMember value "w" v))
+  (h [_] (clojure.core/-> (.getMember value "h") .asInt))
+  (set_h [_ v] (.putMember value "h" v))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Rect))))
+
+(clojure.core/defn
+ wrap-pointer
+ [value]
+ (clojure.core/reify clobits.all_targets.IWrapper (unwrap [_] value)))
 
 (def
  ^{:private true}
- get-sdl-init-video478
+ get-sdl-init-video540
  (.getMember polyglot-lib "_SHADOWING_GET_SDL_INIT_VIDEO"))
 
 (clojure.core/defn
  get-sdl-init-video
- ([]
-  (clojure.core/->
-   (.execute get-sdl-init-video478 empty-array)
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ []
+ (clojure.core/->
+  (.execute get-sdl-init-video540 (clojure.core/object-array []))
+  .asInt))
 
 (def
  ^{:private true}
- get-sdl-window-shown479
+ get-sdl-window-shown541
  (.getMember polyglot-lib "_SHADOWING_GET_SDL_WINDOW_SHOWN"))
 
 (clojure.core/defn
  get-sdl-window-shown
- ([]
-  (clojure.core/->
-   (.execute get-sdl-window-shown479 empty-array)
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ []
+ (clojure.core/->
+  (.execute get-sdl-window-shown541 (clojure.core/object-array []))
+  .asInt))
 
 (def
  ^{:private true}
- get-null480
+ get-null542
  (.getMember polyglot-lib "_SHADOWING_get_null"))
 
-(clojure.core/defn get-null ([] (.executeVoid get-null480 empty-array)))
+(clojure.core/defn
+ get-null
+ "Ret: {:wrapper wrap-pointer, :annotation nil}"
+ 
+ []
+ (wrap-pointer
+  (.executeVoid get-null542 (clojure.core/object-array []))))
 
 (def
  ^{:private true}
- gen-title481
+ gen-title543
  (.getMember polyglot-lib "_SHADOWING_gen_title"))
 
-(clojure.core/defn gen-title ([] (.execute gen-title481 empty-array)))
+(clojure.core/defn
+ gen-title
+ "Ret: {:wrapper wrap-pointer, :annotation nil}"
+ 
+ []
+ (wrap-pointer (.execute gen-title543 (clojure.core/object-array []))))
 
 (def
  ^{:private true}
- create-rect482
+ create-rect544
  (.getMember polyglot-lib "_SHADOWING_create_rect"))
 
 (clojure.core/defn
  create-rect
- ([x y w h]
-  (.execute create-rect482 (clojure.core/object-array [x y w h]))))
+ "Ret: {:wrapper wrap-pointer, :annotation nil}"
+ 
+ [^long x ^long y ^long w ^long h]
+ (wrap-pointer
+  (.execute
+   create-rect544
+   (clojure.core/object-array [(int x) (int y) (int w) (int h)]))))
 
 (def
  ^{:private true}
- get-e483
+ get-e545
  (.getMember polyglot-lib "_SHADOWING_get_e"))
 
 (clojure.core/defn
  get-e
- ([]
-  (.as
-   (.execute get-e483 empty-array)
-   bindings.sdl_structs.ISDL_Event)))
+ "Ret: {:wrapper wrap-sdl-event, :annotation nil}"
+ 
+ []
+ (wrap-sdl-event (.execute get-e545 (clojure.core/object-array []))))
 
 (def
  ^{:private true}
- init484
+ init546
  (.getMember polyglot-lib "_SHADOWING_SDL_Init"))
 
 (clojure.core/defn
  init
- ([flags]
-  (clojure.core/->
-   (.execute init484 (clojure.core/object-array [flags]))
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ [^long flags]
+ (clojure.core/->
+  (.execute init546 (clojure.core/object-array [(int flags)]))
+  .asInt))
 
 (def
  ^{:private true}
- poll-event485
+ poll-event547
  (.getMember polyglot-lib "_SHADOWING_SDL_PollEvent"))
 
 (clojure.core/defn
  poll-event
- ([event]
-  (clojure.core/->
-   (.execute poll-event485 (clojure.core/object-array [event]))
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ [^clobits.all_targets.IWrapper event]
+ (clojure.core/->
+  (.execute
+   poll-event547
+   (clojure.core/object-array [(.unwrap event)]))
+  .asInt))
 
 (def
  ^{:private true}
- delay486
+ delay548
  (.getMember polyglot-lib "_SHADOWING_SDL_Delay"))
 
 (clojure.core/defn
  delay
- ([ms] (.executeVoid delay486 (clojure.core/object-array [ms]))))
+ "Ret: {:wrapper nil, :annotation nil}"
+ 
+ [^long ms]
+ (.executeVoid delay548 (clojure.core/object-array [(int ms)])))
 
 (def
  ^{:private true}
- update-window-surface487
+ update-window-surface549
  (.getMember polyglot-lib "_SHADOWING_SDL_UpdateWindowSurface"))
 
 (clojure.core/defn
  update-window-surface
- ([window]
-  (clojure.core/->
-   (.execute
-    update-window-surface487
-    (clojure.core/object-array [window]))
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ [^clobits.all_targets.IWrapper window]
+ (clojure.core/->
+  (.execute
+   update-window-surface549
+   (clojure.core/object-array [(.unwrap window)]))
+  .asInt))
 
 (def
  ^{:private true}
- get-window-surface488
+ get-window-surface550
  (.getMember polyglot-lib "_SHADOWING_SDL_GetWindowSurface"))
 
 (clojure.core/defn
  get-window-surface
- ([window]
-  (.as
-   (.execute
-    get-window-surface488
-    (clojure.core/object-array [window]))
-   bindings.sdl_structs.ISDL_Surface)))
+ "Ret: {:wrapper wrap-sdl-surface, :annotation nil}"
+ 
+ [^clobits.all_targets.IWrapper window]
+ (wrap-sdl-surface
+  (.execute
+   get-window-surface550
+   (clojure.core/object-array [(.unwrap window)]))))
 
 (def
  ^{:private true}
- map-rgb489
+ map-rgb551
  (.getMember polyglot-lib "_SHADOWING_SDL_MapRGB"))
 
 (clojure.core/defn
  map-rgb
- ([format r g b]
-  (clojure.core/->
-   (.execute map-rgb489 (clojure.core/object-array [format r g b]))
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ [^clobits.all_targets.IWrapper format ^long r ^long g ^long b]
+ (clojure.core/->
+  (.execute
+   map-rgb551
+   (clojure.core/object-array
+    [(.unwrap format) (int r) (int g) (int b)]))
+  .asInt))
 
 (def
  ^{:private true}
- create-window490
+ create-window552
  (.getMember polyglot-lib "_SHADOWING_SDL_CreateWindow"))
 
 (clojure.core/defn
  create-window
- ([title x y w h flags]
+ "Ret: {:wrapper wrap-pointer, :annotation nil}"
+ 
+ [^clobits.all_targets.IWrapper
+  title
+  ^Long
+  x
+  ^Long
+  y
+  ^Long
+  w
+  ^Long
+  h
+  ^Long
+  flags]
+ (wrap-pointer
   (.execute
-   create-window490
-   (clojure.core/object-array [title x y w h flags]))))
+   create-window552
+   (clojure.core/object-array
+    [(.unwrap title) (int x) (int y) (int w) (int h) (int flags)]))))
 
 (def
  ^{:private true}
- fill-rect491
+ fill-rect553
  (.getMember polyglot-lib "_SHADOWING_SDL_FillRect"))
 
 (clojure.core/defn
  fill-rect
- ([dst rect color]
-  (clojure.core/->
-   (.execute fill-rect491 (clojure.core/object-array [dst rect color]))
-   .asInt)))
+ "Ret: {:wrapper nil, :annotation long}"
+ ^long
+ [^clobits.all_targets.IWrapper
+  dst
+  ^clobits.all_targets.IWrapper
+  rect
+  ^long
+  color]
+ (clojure.core/->
+  (.execute
+   fill-rect553
+   (clojure.core/object-array
+    [(.unwrap dst) (.unwrap rect) (int color)]))
+  .asInt))
 
 (def
  ^{:private true}
- quit492
+ quit554
  (.getMember polyglot-lib "_SHADOWING_SDL_Quit"))
 
-(clojure.core/defn quit ([] (.executeVoid quit492 empty-array)))
+(clojure.core/defn
+ quit
+ "Ret: {:wrapper nil, :annotation nil}"
+ 
+ []
+ (.executeVoid quit554 (clojure.core/object-array [])))
 

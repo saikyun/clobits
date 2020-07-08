@@ -54,16 +54,24 @@
   }")))
 
 (defn gen-setters
-  [types {:keys [type sym] :as attr} {:keys [lib-name wrappers]}]
+  [types {:keys [type sym] :as attr} {:keys [lib-name wrappers structs]}]
   (let [t (get-type-throw types attr)
-        w (wrappers t)]
+        w (wrappers t)
+        input-type (cond (get structs type)
+                         (at/struct-sym->interface-sym lib-name type)
+                         
+                         (= type "void")
+                         'clobits.all_targets.IVoidPointerYE
+                         
+                         :else
+                         t)]
     (if w
       (str (str "  public void set_" sym "(" (or w t) " v) {
     " (str "this.pointer.set_" sym "(v.unwrap());")
                 "
   }\n\n")
            
-           (str "  public void set_" sym "(" (at/struct-sym->interface-sym lib-name type) " v) {
+           (str "  public void set_" sym "(" input-type " v) {
     " (str "this.pointer.set_" sym "(v);")
                 "
   }"))

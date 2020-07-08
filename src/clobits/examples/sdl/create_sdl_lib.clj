@@ -251,8 +251,7 @@ int SDL_FillRect(SDL_Surface*    dst,
         opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class
                                            types
                                            %
-                                           {:lib-name 'bindings.sdl
-                                            :wrappers wrappers}) (vals structs)))
+                                           opts) (vals structs)))
         opts (ni/persist-lib opts)]
     opts)
   

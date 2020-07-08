@@ -62,16 +62,16 @@ Uint32  _SHADOWING_SDL_MapRGB(const SDL_PixelFormat * format,  Uint8  r,  Uint8 
 SDL_Window * _SHADOWING_SDL_CreateWindow(const char * title,  int  x,  int  y,  int  w,  int  h,  Uint32  flags) {
 
 #if IS_POLYGLOT
-const char *title475;
+const char *title537;
 if (polyglot_is_string(title)) {
  int length = polyglot_get_string_size(title);
  char str[length + 1];
  polyglot_as_string(title, str, length + 1, "ascii");
- title475 = str;
+ title537 = str;
  } else {
- title475 = title;
+ title537 = title;
  }
-   return SDL_CreateWindow(title475, x, y, w, h, flags);
+   return SDL_CreateWindow(title537, x, y, w, h, flags);
 #else
     return SDL_CreateWindow(title, x, y, w, h, flags);
 #endif
