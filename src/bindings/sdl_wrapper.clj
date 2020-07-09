@@ -5,9 +5,12 @@
   clobits.all_targets.IWrapperNI
   bindings.sdl_ni_generated.WrapSDL_Surface
   bindings.sdl_ni_generated.WrapSDL_Event
+  bindings.sdl_ni_generated.WrapSDL_Keysym
   clobits.wrappers.WrapPointer
   bindings.sdl_ni_generated.WrapSDL_PixelFormat
-  clobits.wrappers.WrapVoid)
+  clobits.wrappers.WrapVoid
+  bindings.sdl_ni_generated.WrapSDL_Rect
+  bindings.sdl_ni_generated.WrapSDL_KeyboardEvent)
  (:gen-class))
 
 (clojure.core/defn
@@ -40,10 +43,10 @@
 
 (clojure.core/defn
  create-rect
- "Ret: {:wrapper clobits.wrappers.WrapVoid., :annotation clobits.wrappers.WrapVoid}"
- ^clobits.wrappers.WrapVoid
+ "Ret: {:wrapper bindings.sdl_ni_generated.WrapSDL_Rect., :annotation bindings.sdl_ni_generated.WrapSDL_Rect}"
+ ^bindings.sdl_ni_generated.WrapSDL_Rect
  [^long x ^long y ^long w ^long h]
- (clobits.wrappers.WrapVoid.
+ (bindings.sdl_ni_generated.WrapSDL_Rect.
   (bindings.sdl/create-rect (int x) (int y) (int w) (int h))))
 
 (clojure.core/defn

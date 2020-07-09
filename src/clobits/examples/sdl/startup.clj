@@ -11,12 +11,71 @@
   (do (println "In polyglot context")
       (require '[bindings.sdl-ns :as sdl])))
 
-(defmacro cset!
-  [[field struct] v]
-  (let [field (apply str (rest (str field)))]
-    (if *native-image*
-      `(~(symbol (apply str ".set_" field)) ~struct ~v)
-      `(~'.putMember ~struct ~field ~v))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(comment
+  (.getMemberKeys (.getMember (.execute (.getMember sdl/polyglot-lib "_SHADOWING_get_e") (clojure.core/object-array [])) "key"))
+  )
+
+(defn handle-input
+  [state]
+  (loop [state state]
+    (if (= 0 (sdl/poll-event (sdl/get-e)))
+      state
+      (case (.type (sdl/get-e))
+        
+        256 
+        (assoc state :quit true)
+        
+        768 ;; key down
+        (do
+          (case  (.sym (.keysym (.key (sdl/get-e))))
+            1073741903
+            (update state :down conj :right)
+            
+            1073741904
+            (update state :down conj :left)
+            
+            state))
+        
+        769 ;; key up
+        (case  (.sym (.keysym (.key (sdl/get-e))))
+          1073741903
+          (update state :down disj :right)
+          
+          1073741904
+          (update state :down disj :left)
+          
+          state)
+        
+        (do
+          (println "event type" (.type (sdl/get-e)))
+          (recur state))))))
+
+(defn main-loop
+  [window screen rect state]
+  (let [state (handle-input state)]
+    (when (-> state :down :right)
+      (.set_x rect (inc (.x rect))))
+    (when (-> state :down :left)
+      (.set_x rect (dec (.x rect))))
+    (sdl/fill-rect screen (sdl/get-null) (sdl/map-rgb (.format screen) 0 0 0))
+    (sdl/fill-rect screen rect (sdl/map-rgb (.format screen) 0xFF 0 0))
+    (sdl/update-window-surface window)    
+    
+    state))
 
 (defn -main [& args]
   (sdl/init (sdl/get-sdl-init-video))
@@ -29,23 +88,20 @@
                                   (sdl/get-sdl-window-shown))
         screen (sdl/get-window-surface window)
         rect (sdl/create-rect 0 0 100 50)]
-    (sdl/fill-rect screen rect (sdl/map-rgb (.format screen) 0xFF 0 0))
-    
-    ;;(cset! (.-format screen) (.format screen))
     (.set_format screen (.format screen))      
     
-    (sdl/update-window-surface window)
     (println "rgb1" (sdl/map-rgb (.format screen) 0xFF 0xFF 0xFF))
     (println "rgb2" (sdl/map-rgb (.format screen) 0xFF 0 0))
     
-    (loop [quit false]
-      (if (let [quit (when-not (= 0 (sdl/poll-event (sdl/get-e)))
-                       (when (= 256 (.type (sdl/get-e)))
-                         true))]
-            (println (.type (sdl/get-e)))
-            quit)
-        :quit
-        (recur quit)))
+    (loop [state {:quit false
+                  :down #{}}]
+      (let [state (try (main-loop window screen rect state)
+                       (catch Exception e
+                         (println "Got error" e)
+                         state))]
+        (when-not (:quit state)
+          (Thread/sleep 10)
+          (recur state))))
     
     (sdl/quit)))
 

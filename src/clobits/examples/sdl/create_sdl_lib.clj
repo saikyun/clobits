@@ -68,10 +68,83 @@ int SDL_FillRect(SDL_Surface*    dst,
                  Uint32          color)
 "])
 
+;; the different parts of a struct
+;; "SDL_Surface"                                c symbol
+;; 'bindings.sdl_ni_generated.SDL_Surface       ni interface
+;; 'bindings.sdl_structs.ISDL_Surface           generic interface
+;; 'bindings.sdl_ni_generated.WrapSDL_Event     ni wrapper class
+;; 'bindings.sdl_ni_generated.WrapSDL_Event.    ni wrapper constructor
+;; 'bindings.sdl-ns.wrap-sdl-event              polyglot wrapper function
+;; 'clobits.all_targets.IWrapperNI              ni wrapper interface
+;; 'clobits.all_targets.IWrapper                generic wrapper interface
+
+
+;; the different parts
+;;
+
+;; "SDL_Surface" -- it is what it is
+
+;; bindings.sdl -- library name
+
+;; bindings.sdl_ni_generated
+;; -- package for generated ni code
+;; -- perhaps change to bindings.sdl.ni
+;;
+;;      SDL_Surface
+;;      -- interface for ni code, to get correct types
+;;      -- perhaps ISDL_SurfaceNI instead
+;;
+;;      WrapSDL_Event
+;;      -- class to wrap native object
+;;      -- perhaps SDL_EventWrapper
+;;
+
+;; bindings.sdl-ns
+;; -- namespace for polyglot namespace
+;; -- perhaps bindings.sdl.poly
+;;
+;;      wrap-sdl-event
+;;      -- function to reify ISDL_Event and IWrapper
+;;      -- should be turned into class, like WrapSDL_Event
+;;         because of tooling + performance
+;;
+
+;; bindings.sdl_structs
+;; -- namespace for struct interfaces for both ni and poly
+;; -- perhaps rename to bindings.sdl.core
+;;
+;;      ISDL_Surface
+;;      -- interface that SDL_Surface and wrap-sdl-event implements
+;;      -- should be"single source" of documentation
+;;
+
+;; clobits.all_targets
+;; -- package for interfaces used in both NI and poly
+;;
+;;      IWrapper
+;;      -- provides .unwrap, wrappers must implement this
+;;      -- perhaps should be moved to clobits.core
+;;
+;;      IWrapperNI
+;;      -- extends IWrapper, needed to provide correct types for ni
+;;      -- perhaps should be moved to clobits.native-image
+;;
+
+
+
+
 (def structs
   {"SDL_Event" {:clj-sym 'SDL_Event
                 :c-sym "SDL_Event"
-                :attrs [{:sym "type" :type "int"}]}
+                :attrs [{:sym "type" :type "int"}
+                        {:sym "key" :type "SDL_KeyboardEvent"}]}
+   "SDL_KeyboardEvent" {:clj-sym 'SDL_KeyboardEvent
+                        :c-sym "SDL_KeyboardEvent"
+                        :attrs [{:sym "keysym"
+                                 :type "SDL_Keysym"}]}
+   "SDL_Keysym" {:clj-sym 'SDL_Keysym
+                 :c-sym "SDL_Keysym"
+                 :attrs [{:sym "sym" :type "int"}]}
    "SDL_Surface" {:clj-sym 'SDL_Surface
                   :c-sym "SDL_Surface"
                   :attrs [{:sym "format" :type "SDL_PixelFormat" :pointer "*"}]}
@@ -99,7 +172,9 @@ int SDL_FillRect(SDL_Surface*    dst,
    "Sint16" 'int
    "Uint8" 'int
    "SDL_Surface" 'bindings.sdl_ni_generated.SDL_Surface
-   "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
+   "SDL_Rect" 'bindings.sdl_ni_generated.SDL_Rect
+   "SDL_Keysym" 'bindings.sdl_ni_generated.SDL_Keysym
+   "SDL_KeyboardEvent" 'bindings.sdl_ni_generated.SDL_KeyboardEvent
    "SDL_Event" 'bindings.sdl_ni_generated.SDL_Event
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
    "SDL_PixelFormat" 'bindings.sdl_ni_generated.SDL_PixelFormat})
@@ -210,7 +285,9 @@ int SDL_FillRect(SDL_Surface*    dst,
    "Sint16" 'int
    "Uint8" 'int
    "SDL_Surface" 'bindings.sdl_structs.ISDL_Surface
-   "SDL_Rect" 'org.graalvm.nativeimage.c.type.VoidPointer
+   "SDL_Keysym" 'bindings.sdl_structs.ISDL_Keysym
+   "SDL_KeyboardEvent" 'bindings.sdl_structs.ISDL_KeyboardEvent
+   "SDL_Rect" 'bindings.sdl_structs.ISDL_Rect
    "SDL_Event" 'bindings.sdl_structs.ISDL_Event
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
    "SDL_PixelFormat" 'bindings.sdl_structs.ISDL_PixelFormat})

@@ -41,7 +41,25 @@
  ^{org.graalvm.polyglot.HostAccess$Implementable true}
  bindings.sdl_structs.ISDL_Event
  :methods
- [[type [] int] [set_type [int] void]])
+ [[type [] int]
+  [set_type [int] void]
+  [key [] bindings.sdl_structs.ISDL_KeyboardEvent]
+  [set_key [bindings.sdl_structs.ISDL_KeyboardEvent] void]])
+
+(clojure.core/gen-interface
+ :name
+ ^{org.graalvm.polyglot.HostAccess$Implementable true}
+ bindings.sdl_structs.ISDL_KeyboardEvent
+ :methods
+ [[keysym [] bindings.sdl_structs.ISDL_Keysym]
+  [set_keysym [bindings.sdl_structs.ISDL_Keysym] void]])
+
+(clojure.core/gen-interface
+ :name
+ ^{org.graalvm.polyglot.HostAccess$Implementable true}
+ bindings.sdl_structs.ISDL_Keysym
+ :methods
+ [[sym [] int] [set_sym [int] void]])
 
 (clojure.core/gen-interface
  :name
@@ -75,9 +93,12 @@
 
 (clojure.core/declare
  wrap-sdl-event
+ wrap-sdl-rect
  wrap-pointer
  wrap-sdl-pixel-format
- wrap-sdl-surface)
+ wrap-sdl-surface
+ wrap-sdl-keysym
+ wrap-sdl-keyboard-event)
 
 (clojure.core/defn
  wrap-sdl-event
@@ -86,8 +107,30 @@
   bindings.sdl_structs.ISDL_Event
   (type [_] (clojure.core/-> (.getMember value "type") .asInt))
   (set_type [_ v] (.putMember value "type" v))
+  (key [_] (wrap-sdl-keyboard-event (.getMember value "key")))
+  (set_key [_ v] (.putMember value "key" (.unwrap v)))
   clobits.all_targets.IWrapper
   (unwrap [_] (.as value bindings.sdl_structs.ISDL_Event))))
+
+(clojure.core/defn
+ wrap-sdl-keyboard-event
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_KeyboardEvent
+  (keysym [_] (wrap-sdl-keysym (.getMember value "keysym")))
+  (set_keysym [_ v] (.putMember value "keysym" (.unwrap v)))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_KeyboardEvent))))
+
+(clojure.core/defn
+ wrap-sdl-keysym
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_Keysym
+  (sym [_] (clojure.core/-> (.getMember value "sym") .asInt))
+  (set_sym [_ v] (.putMember value "sym" v))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Keysym))))
 
 (clojure.core/defn
  wrap-sdl-surface
@@ -190,10 +233,10 @@
 
 (clojure.core/defn
  create-rect
- "Ret: {:wrapper wrap-pointer, :annotation nil}"
+ "Ret: {:wrapper wrap-sdl-rect, :annotation nil}"
  
  [^long x ^long y ^long w ^long h]
- (wrap-pointer
+ (wrap-sdl-rect
   (.execute
    create-rect544
    (clojure.core/object-array [(int x) (int y) (int w) (int h)]))))

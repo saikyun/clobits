@@ -17,8 +17,20 @@ public class WrapSDL_Event implements ISDL_Event, IWrapperNI {
     return this.pointer.type();
   }
 
+  public bindings.sdl_ni_generated.WrapSDL_KeyboardEvent key() {
+    return new bindings.sdl_ni_generated.WrapSDL_KeyboardEvent(this.pointer.key());
+  }
+
   public void set_type(int v) {
     this.pointer.set_type(v);
+  }
+
+  public void set_key(bindings.sdl_ni_generated.WrapSDL_KeyboardEvent v) {
+    this.pointer.set_key(v.unwrap());
+  }
+
+  public void set_key(bindings.sdl_structs.ISDL_KeyboardEvent v) {
+    this.pointer.set_key(v);
   }
 
   public WrapSDL_Event(SDL_Event pointer) {
