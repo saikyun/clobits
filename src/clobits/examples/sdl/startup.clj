@@ -95,17 +95,13 @@
    ^ISDL_Surface screen
    ^ISDL_Rect rect
    state]
-  (let [state (handle-input state)]
-    
-    (when (-> state :down :right)
-      (.set_x rect (inc (.x rect))))
-    (when (-> state :down :left)
-      (.set_x rect (dec (.x rect))))    
-    
-    (when (-> state :down :down)
-      (.set_y rect (inc (.y rect))))
-    (when (-> state :down :up)
-      (.set_y rect (dec (.y rect))))
+  (let [state (cond-> (handle-input state)
+                (-> state :down :right) (update-in [:pos :x] inc)
+                (-> state :down :left)  (update-in [:pos :x] dec)
+                (-> state :down :down)  (update-in [:pos :y] inc)
+                (-> state :down :up)    (update-in [:pos :y] dec))]
+    (.set_x rect (-> state :pos :x))
+    (.set_y rect (-> state :pos :y))
     
     (sdl/fill-rect screen (sdl/get-null) (sdl/map-rgb (.format screen) 0 0 0))
     (sdl/fill-rect screen rect (sdl/map-rgb (.format screen) 0xFF 0 0))
@@ -130,7 +126,9 @@
     (println "rgb2" (sdl/map-rgb (.format screen) 0xFF 0 0))
     
     (loop [state {:quit false
-                  :down #{}}]
+                  :down #{}
+                  :pos {:x 0
+                        :y 0}}]
       (let [state (try (main-loop window screen rect state)
                        (catch Exception e
                          (println "Got error" e)
