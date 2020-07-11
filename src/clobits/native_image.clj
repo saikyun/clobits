@@ -15,20 +15,31 @@
   (str (lib->package lib-name) "." (java-friendly clj-sym)))
 
 (defn attr->method
-  [types {:keys [sym] :as arg}]
-  [;; getter
-   [(with-meta (symbol sym)
-      {org.graalvm.nativeimage.c.struct.CField sym}) []
-    (get-type-throw types arg)]
-   
-   ;; setter
-   [(with-meta (symbol (str "set_" sym))
-      {org.graalvm.nativeimage.c.struct.CField sym})
-    [(get-type-throw types arg)]
-    'void]])
+  [types {:keys [sym pointer] :as arg} {:keys [primitives]}]
+  (def dafe "true")
+  (def ppp pointer)
+  (def pri primitives)
+  (let [t (get-type-throw types arg)
+        field-or-address (if (and (not (primitives t))
+                                  (not (seq pointer)))
+                           'org.graalvm.nativeimage.c.struct.CFieldAddress
+                           'org.graalvm.nativeimage.c.struct.CField)]
+    (concat ;; getter
+     [[(with-meta (symbol sym)
+         {field-or-address sym})
+       []
+       t]]
+     
+     ;; setter
+     (when (or (primitives t) ;; not sure if setters for non-pointer structs can work
+               (seq pointer))
+       [[(with-meta (symbol (str "set_" sym))
+           {org.graalvm.nativeimage.c.struct.CField sym})
+         [(get-type-throw types arg)]
+         'void]]))))
 
 (defn struct->gen-interface
-  [types {:keys [c-sym clj-sym attrs]} {:keys [lib-name]}]
+  [types {:keys [c-sym clj-sym attrs]} {:keys [lib-name] :as opts}]
   (let [java-friendly-lib-name (java-friendly lib-name)
         context (symbol (str java-friendly-lib-name "_ni.Headers"))]
     `(gen-interface
@@ -38,7 +49,7 @@
                 org.graalvm.nativeimage.c.struct.CStruct c-sym})
       :extends [org.graalvm.word.PointerBase
                 ~(symbol (str java-friendly-lib-name "_structs.I" (java-friendly clj-sym)))]
-      :methods ~(->> (map #(attr->method types %) attrs)
+      :methods ~(->> (map #(attr->method types % opts) attrs)
                      (apply concat)
                      (into [])))))
 
@@ -75,7 +86,7 @@
     " (str "this.pointer.set_" sym "(v);")
                 "
   }"))
-
+      
       
       
       (str "  public void set_" sym "(" (or w t) " v) {
@@ -148,6 +159,7 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapperNI {
                                  :attrs [{:sym "format" :type "SDL_PixelFormat" :pointer "*"}]}
                             {:lib-name 'bindings.sdl
                              :wrappers example-wrappers
+                             :primitives #{}
                              })
  )
 
@@ -156,7 +168,8 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapperNI {
   (struct->gen-interface ttt {:clj-sym 'SDL_Event
                               :c-sym "SDL_Event"
                               :attrs [{:sym "type" :type "int"}]}
-                         {:lib-name 'sdl})
+                         {:lib-name 'sdl
+                          :primitives #{}})
   
   (struct->gen-wrapper-class ttt {:clj-sym 'SDL_Event
                                   :c-sym "SDL_Event"

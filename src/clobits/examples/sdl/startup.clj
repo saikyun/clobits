@@ -1,35 +1,23 @@
-(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)        ; reflection warnings on structs means
+                                        ; that native image will crash when accessing fields
 
 (ns clobits.examples.sdl.startup
-  (:require [clobits.native-interop :refer [*native-image*]] ;; this just sets *native-image*
+  (:require [clobits.native-interop :refer [*native-image*]] ; this just sets *native-image*
             [clobits.examples.sdl.constants :as cs])
+  (:import [bindings.sdl_structs ISDL_Surface ISDL_Rect])
   (:gen-class))
 
 (if *native-image*
   (do (println "In native image context")
       (require '[bindings.sdl-wrapper :as sdl])
-      #_(import '[bindings sdl]))
+      (import '[bindings.sdl_ni_generated WrapSDL_Surface WrapSDL_Rect]))
   (do (println "In polyglot context")
       (require '[bindings.sdl-ns :as sdl])))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (comment
   (.getMemberKeys (.getMember (.execute (.getMember sdl/polyglot-lib "_SHADOWING_get_e") (clojure.core/object-array [])) "key"))
-
-
+  
+  
   (.getMember sdl/polyglot-lib "SDL_KeyCode")
   )
 
@@ -95,15 +83,18 @@
                (update state :down disj :down)
                
                (do
-                 (println "key up" (.sym (.keysym (.key (sdl/get-e))))))
-               state)
+                 (println "key up" (.sym (.keysym (.key (sdl/get-e)))))
+                 state))
         
         (do
           #_(println "event type" (.type (sdl/get-e)))
           (recur state))))))
 
 (defn main-loop
-  [window screen rect state]
+  [window 
+   ^ISDL_Surface screen
+   ^ISDL_Rect rect
+   state]
   (let [state (handle-input state)]
     
     (when (-> state :down :right)
@@ -124,7 +115,7 @@
 
 (defn -main [& args]
   (sdl/init (sdl/get-sdl-init-video))
-
+  
   (let [window (sdl/create-window (sdl/gen-title)
                                   0
                                   0

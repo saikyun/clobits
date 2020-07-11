@@ -272,7 +272,7 @@ int SDL_FillRect(SDL_Surface*    dst,
            (~'unwrap [~'_]
             ~value-sym))))]))
 
-(def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl}) (vals structs)))
+(def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl, :primitives primitives}) (vals structs)))
 
 (def poly-types
   {"void" {"*" 'clobits.all_targets.IVoidPointerYE
@@ -339,4 +339,5 @@ int SDL_FillRect(SDL_Surface*    dst,
 
 (comment
   (-main)
+  
   )

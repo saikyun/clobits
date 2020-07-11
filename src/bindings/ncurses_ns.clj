@@ -11,7 +11,7 @@
 (def ^{:private true} empty-array (clojure.core/object-array 0))
 
 (clojure.core/defn
- context-f495
+ context-f499
  []
  (clojure.core/->
   (org.graalvm.polyglot.Context/newBuilder
@@ -21,7 +21,7 @@
 
 (clojure.core/defn
  ^{:private true}
- source-f496
+ source-f500
  []
  (clojure.core/->
   (org.graalvm.polyglot.Source/newBuilder
@@ -32,13 +32,13 @@
     "libs/libbindings$ncurses.so"))
   (.build)))
 
-(def polyglot-context (context-f495))
+(def polyglot-context (context-f499))
 
-(def polyglot-lib (.eval polyglot-context (source-f496)))
+(def polyglot-lib (.eval polyglot-context (source-f500)))
 
 (def
  ^{:private true}
- free497
+ free501
  (.getMember polyglot-lib "_SHADOWING_free"))
 
 (clojure.core/defn
@@ -46,11 +46,11 @@
  "Ret: {:wrapper nil, :annotation nil}"
  
  [^clobits.all_targets.IWrapper ptr]
- (.executeVoid free497 (clojure.core/object-array [(.unwrap ptr)])))
+ (.executeVoid free501 (clojure.core/object-array [(.unwrap ptr)])))
 
 (def
  ^{:private true}
- malloc498
+ malloc502
  (.getMember polyglot-lib "_SHADOWING_malloc"))
 
 (clojure.core/defn
@@ -58,11 +58,11 @@
  "Ret: {:wrapper nil, :annotation nil}"
  
  [^clobits.all_targets.IWrapper size]
- (.executeVoid malloc498 (clojure.core/object-array [(.unwrap size)])))
+ (.executeVoid malloc502 (clojure.core/object-array [(.unwrap size)])))
 
 (def
  ^{:private true}
- initscr499
+ initscr503
  (.getMember polyglot-lib "_SHADOWING_initscr"))
 
 (clojure.core/defn
@@ -70,11 +70,11 @@
  "Ret: {:wrapper nil, :annotation nil}"
  
  []
- (.execute initscr499 (clojure.core/object-array [])))
+ (.execute initscr503 (clojure.core/object-array [])))
 
 (def
  ^{:private true}
- delwin500
+ delwin504
  (.getMember polyglot-lib "_SHADOWING_delwin"))
 
 (clojure.core/defn
@@ -83,12 +83,12 @@
  
  [^clobits.all_targets.IWrapper win]
  (clojure.core/->
-  (.execute delwin500 (clojure.core/object-array [(.unwrap win)]))
+  (.execute delwin504 (clojure.core/object-array [(.unwrap win)]))
   .asInt))
 
 (def
  ^{:private true}
- endwin501
+ endwin505
  (.getMember polyglot-lib "_SHADOWING_endwin"))
 
 (clojure.core/defn
@@ -97,12 +97,12 @@
  
  []
  (clojure.core/->
-  (.execute endwin501 (clojure.core/object-array []))
+  (.execute endwin505 (clojure.core/object-array []))
   .asInt))
 
 (def
  ^{:private true}
- noecho502
+ noecho506
  (.getMember polyglot-lib "_SHADOWING_noecho"))
 
 (clojure.core/defn
@@ -111,12 +111,12 @@
  
  []
  (clojure.core/->
-  (.execute noecho502 (clojure.core/object-array []))
+  (.execute noecho506 (clojure.core/object-array []))
   .asInt))
 
 (def
  ^{:private true}
- curs-set503
+ curs-set507
  (.getMember polyglot-lib "_SHADOWING_curs_set"))
 
 (clojure.core/defn
@@ -126,13 +126,13 @@
  [^clobits.all_targets.IWrapper visibility]
  (clojure.core/->
   (.execute
-   curs-set503
+   curs-set507
    (clojure.core/object-array [(.unwrap visibility)]))
   .asInt))
 
 (def
  ^{:private true}
- mvprintw504
+ mvprintw508
  (.getMember polyglot-lib "_SHADOWING_mvprintw"))
 
 (clojure.core/defn
@@ -147,13 +147,13 @@
   fmt]
  (clojure.core/->
   (.execute
-   mvprintw504
+   mvprintw508
    (clojure.core/object-array [(.unwrap y) (.unwrap x) (.unwrap fmt)]))
   .asInt))
 
 (def
  ^{:private true}
- clear505
+ clear509
  (.getMember polyglot-lib "_SHADOWING_clear"))
 
 (clojure.core/defn
@@ -162,12 +162,12 @@
  
  []
  (clojure.core/->
-  (.execute clear505 (clojure.core/object-array []))
+  (.execute clear509 (clojure.core/object-array []))
   .asInt))
 
 (def
  ^{:private true}
- getmaxx506
+ getmaxx510
  (.getMember polyglot-lib "_SHADOWING_getmaxx"))
 
 (clojure.core/defn
@@ -176,12 +176,12 @@
  
  [^clobits.all_targets.IWrapper win]
  (clojure.core/->
-  (.execute getmaxx506 (clojure.core/object-array [(.unwrap win)]))
+  (.execute getmaxx510 (clojure.core/object-array [(.unwrap win)]))
   .asInt))
 
 (def
  ^{:private true}
- getmaxy507
+ getmaxy511
  (.getMember polyglot-lib "_SHADOWING_getmaxy"))
 
 (clojure.core/defn
@@ -190,12 +190,12 @@
  
  [^clobits.all_targets.IWrapper win]
  (clojure.core/->
-  (.execute getmaxy507 (clojure.core/object-array [(.unwrap win)]))
+  (.execute getmaxy511 (clojure.core/object-array [(.unwrap win)]))
   .asInt))
 
 (def
  ^{:private true}
- getmaxyx508
+ getmaxyx512
  (.getMember polyglot-lib "_SHADOWING_getmaxyx"))
 
 (clojure.core/defn
@@ -209,12 +209,12 @@
   ^clobits.all_targets.IWrapper
   x]
  (.executeVoid
-  getmaxyx508
+  getmaxyx512
   (clojure.core/object-array [(.unwrap win) (.unwrap y) (.unwrap x)])))
 
 (def
  ^{:private true}
- printw509
+ printw513
  (.getMember polyglot-lib "_SHADOWING_printw"))
 
 (clojure.core/defn
@@ -223,12 +223,12 @@
  
  [^clobits.all_targets.IWrapper arg0]
  (clojure.core/->
-  (.execute printw509 (clojure.core/object-array [(.unwrap arg0)]))
+  (.execute printw513 (clojure.core/object-array [(.unwrap arg0)]))
   .asInt))
 
 (def
  ^{:private true}
- refresh510
+ refresh514
  (.getMember polyglot-lib "_SHADOWING_refresh"))
 
 (clojure.core/defn
@@ -237,12 +237,12 @@
  
  []
  (clojure.core/->
-  (.execute refresh510 (clojure.core/object-array []))
+  (.execute refresh514 (clojure.core/object-array []))
   .asInt))
 
 (def
  ^{:private true}
- wrefresh511
+ wrefresh515
  (.getMember polyglot-lib "_SHADOWING_wrefresh"))
 
 (clojure.core/defn
@@ -251,6 +251,6 @@
  
  [^clobits.all_targets.IWrapper win]
  (clojure.core/->
-  (.execute wrefresh511 (clojure.core/object-array [(.unwrap win)]))
+  (.execute wrefresh515 (clojure.core/object-array [(.unwrap win)]))
   .asInt))
 

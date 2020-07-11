@@ -11,7 +11,7 @@
 (def ^{:private true} empty-array (clojure.core/object-array 0))
 
 (clojure.core/defn
- context-f538
+ context-f542
  []
  (clojure.core/->
   (org.graalvm.polyglot.Context/newBuilder
@@ -21,7 +21,7 @@
 
 (clojure.core/defn
  ^{:private true}
- source-f539
+ source-f543
  []
  (clojure.core/->
   (org.graalvm.polyglot.Source/newBuilder
@@ -32,9 +32,9 @@
     "libs/libbindings$sdl.so"))
   (.build)))
 
-(def polyglot-context (context-f538))
+(def polyglot-context (context-f542))
 
-(def polyglot-lib (.eval polyglot-context (source-f539)))
+(def polyglot-lib (.eval polyglot-context (source-f543)))
 
 (clojure.core/gen-interface
  :name
@@ -175,7 +175,7 @@
 
 (def
  ^{:private true}
- get-sdl-init-video540
+ get-sdl-init-video544
  (.getMember polyglot-lib "_SHADOWING_GET_SDL_INIT_VIDEO"))
 
 (clojure.core/defn
@@ -184,12 +184,12 @@
  ^long
  []
  (clojure.core/->
-  (.execute get-sdl-init-video540 (clojure.core/object-array []))
+  (.execute get-sdl-init-video544 (clojure.core/object-array []))
   .asInt))
 
 (def
  ^{:private true}
- get-sdl-window-shown541
+ get-sdl-window-shown545
  (.getMember polyglot-lib "_SHADOWING_GET_SDL_WINDOW_SHOWN"))
 
 (clojure.core/defn
@@ -198,12 +198,12 @@
  ^long
  []
  (clojure.core/->
-  (.execute get-sdl-window-shown541 (clojure.core/object-array []))
+  (.execute get-sdl-window-shown545 (clojure.core/object-array []))
   .asInt))
 
 (def
  ^{:private true}
- get-null542
+ get-null546
  (.getMember polyglot-lib "_SHADOWING_get_null"))
 
 (clojure.core/defn
@@ -212,11 +212,11 @@
  
  []
  (wrap-pointer
-  (.executeVoid get-null542 (clojure.core/object-array []))))
+  (.executeVoid get-null546 (clojure.core/object-array []))))
 
 (def
  ^{:private true}
- gen-title543
+ gen-title547
  (.getMember polyglot-lib "_SHADOWING_gen_title"))
 
 (clojure.core/defn
@@ -224,11 +224,11 @@
  "Ret: {:wrapper wrap-pointer, :annotation nil}"
  
  []
- (wrap-pointer (.execute gen-title543 (clojure.core/object-array []))))
+ (wrap-pointer (.execute gen-title547 (clojure.core/object-array []))))
 
 (def
  ^{:private true}
- create-rect544
+ create-rect548
  (.getMember polyglot-lib "_SHADOWING_create_rect"))
 
 (clojure.core/defn
@@ -238,12 +238,12 @@
  [^long x ^long y ^long w ^long h]
  (wrap-sdl-rect
   (.execute
-   create-rect544
+   create-rect548
    (clojure.core/object-array [(int x) (int y) (int w) (int h)]))))
 
 (def
  ^{:private true}
- get-e545
+ get-e549
  (.getMember polyglot-lib "_SHADOWING_get_e"))
 
 (clojure.core/defn
@@ -251,11 +251,11 @@
  "Ret: {:wrapper wrap-sdl-event, :annotation nil}"
  
  []
- (wrap-sdl-event (.execute get-e545 (clojure.core/object-array []))))
+ (wrap-sdl-event (.execute get-e549 (clojure.core/object-array []))))
 
 (def
  ^{:private true}
- init546
+ init550
  (.getMember polyglot-lib "_SHADOWING_SDL_Init"))
 
 (clojure.core/defn
@@ -264,12 +264,12 @@
  ^long
  [^long flags]
  (clojure.core/->
-  (.execute init546 (clojure.core/object-array [(int flags)]))
+  (.execute init550 (clojure.core/object-array [(int flags)]))
   .asInt))
 
 (def
  ^{:private true}
- poll-event547
+ poll-event551
  (.getMember polyglot-lib "_SHADOWING_SDL_PollEvent"))
 
 (clojure.core/defn
@@ -279,13 +279,13 @@
  [^clobits.all_targets.IWrapper event]
  (clojure.core/->
   (.execute
-   poll-event547
+   poll-event551
    (clojure.core/object-array [(.unwrap event)]))
   .asInt))
 
 (def
  ^{:private true}
- delay548
+ delay552
  (.getMember polyglot-lib "_SHADOWING_SDL_Delay"))
 
 (clojure.core/defn
@@ -293,11 +293,11 @@
  "Ret: {:wrapper nil, :annotation nil}"
  
  [^long ms]
- (.executeVoid delay548 (clojure.core/object-array [(int ms)])))
+ (.executeVoid delay552 (clojure.core/object-array [(int ms)])))
 
 (def
  ^{:private true}
- update-window-surface549
+ update-window-surface553
  (.getMember polyglot-lib "_SHADOWING_SDL_UpdateWindowSurface"))
 
 (clojure.core/defn
@@ -307,13 +307,13 @@
  [^clobits.all_targets.IWrapper window]
  (clojure.core/->
   (.execute
-   update-window-surface549
+   update-window-surface553
    (clojure.core/object-array [(.unwrap window)]))
   .asInt))
 
 (def
  ^{:private true}
- get-window-surface550
+ get-window-surface554
  (.getMember polyglot-lib "_SHADOWING_SDL_GetWindowSurface"))
 
 (clojure.core/defn
@@ -323,12 +323,12 @@
  [^clobits.all_targets.IWrapper window]
  (wrap-sdl-surface
   (.execute
-   get-window-surface550
+   get-window-surface554
    (clojure.core/object-array [(.unwrap window)]))))
 
 (def
  ^{:private true}
- map-rgb551
+ map-rgb555
  (.getMember polyglot-lib "_SHADOWING_SDL_MapRGB"))
 
 (clojure.core/defn
@@ -338,14 +338,14 @@
  [^clobits.all_targets.IWrapper format ^long r ^long g ^long b]
  (clojure.core/->
   (.execute
-   map-rgb551
+   map-rgb555
    (clojure.core/object-array
     [(.unwrap format) (int r) (int g) (int b)]))
   .asInt))
 
 (def
  ^{:private true}
- create-window552
+ create-window556
  (.getMember polyglot-lib "_SHADOWING_SDL_CreateWindow"))
 
 (clojure.core/defn
@@ -366,13 +366,13 @@
   flags]
  (wrap-pointer
   (.execute
-   create-window552
+   create-window556
    (clojure.core/object-array
     [(.unwrap title) (int x) (int y) (int w) (int h) (int flags)]))))
 
 (def
  ^{:private true}
- fill-rect553
+ fill-rect557
  (.getMember polyglot-lib "_SHADOWING_SDL_FillRect"))
 
 (clojure.core/defn
@@ -387,14 +387,14 @@
   color]
  (clojure.core/->
   (.execute
-   fill-rect553
+   fill-rect557
    (clojure.core/object-array
     [(.unwrap dst) (.unwrap rect) (int color)]))
   .asInt))
 
 (def
  ^{:private true}
- quit554
+ quit558
  (.getMember polyglot-lib "_SHADOWING_SDL_Quit"))
 
 (clojure.core/defn
@@ -402,5 +402,5 @@
  "Ret: {:wrapper nil, :annotation nil}"
  
  []
- (.executeVoid quit554 (clojure.core/object-array [])))
+ (.executeVoid quit558 (clojure.core/object-array [])))
 
