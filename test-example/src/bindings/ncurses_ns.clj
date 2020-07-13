@@ -43,7 +43,7 @@
 
 (clojure.core/defn
  free
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol ptr, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper {:convert wrap-pointer}, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
+ "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol ptr, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
  
  [^clobits.all_targets.IVoidPointerYE ptr]
  (.executeVoid
@@ -57,12 +57,11 @@
 
 (clojure.core/defn
  malloc
- "Args:[{:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true, :annotation long, :arg-symbol size}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/type clobits.all_targets.IVoidPointer, :primitive false, :poly/type clobits.all_targets.IVoidPointerYE, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap}"
+ "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol size}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type clobits.all_targets.IVoidPointer, :primitive false, :poly/type clobits.all_targets.IVoidPointerYE, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap}"
  ^clobits.all_targets.IVoidPointerYE
  [^long size]
- (clojure.core/->
-  (.executeVoid -place-of-malloc (clojure.core/object-array [size]))
-  wrap-pointer))
+ (wrap-pointer
+  (.executeVoid -place-of-malloc (clojure.core/object-array [size]))))
 
 (def
  ^{:private true}
@@ -71,12 +70,11 @@
 
 (clojure.core/defn
  initscr
- "Args:[], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}"
+ "Args:[], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}"
  ^clobits.all_targets.IVoidPointerYE
  []
- (clojure.core/->
-  (.execute -place-of-initscr (clojure.core/object-array []))
-  wrap-pointer))
+ (wrap-pointer
+  (.execute -place-of-initscr (clojure.core/object-array []))))
 
 (def
  ^{:private true}
@@ -85,14 +83,13 @@
 
 (clojure.core/defn
  delwin
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper {:convert wrap-pointer}, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
- (clojure.core/->
+ (.asInt
   (.execute
    -place-of-delwin
-   (clojure.core/object-array [(.unwrap win)]))
-  .asInt))
+   (clojure.core/object-array [(.unwrap win)]))))
 
 (def
  ^{:private true}
@@ -101,12 +98,10 @@
 
 (clojure.core/defn
  endwin
- "Args:[], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
- (clojure.core/->
-  (.execute -place-of-endwin (clojure.core/object-array []))
-  .asInt))
+ (.asInt (.execute -place-of-endwin (clojure.core/object-array []))))
 
 (def
  ^{:private true}
@@ -115,12 +110,10 @@
 
 (clojure.core/defn
  noecho
- "Args:[], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
- (clojure.core/->
-  (.execute -place-of-noecho (clojure.core/object-array []))
-  .asInt))
+ (.asInt (.execute -place-of-noecho (clojure.core/object-array []))))
 
 (def
  ^{:private true}
@@ -129,14 +122,13 @@
 
 (clojure.core/defn
  curs-set
- "Args:[{:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true, :annotation long, :arg-symbol visibility}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol visibility}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^long visibility]
- (clojure.core/->
+ (.asInt
   (.execute
    -place-of-curs-set
-   (clojure.core/object-array [visibility]))
-  .asInt))
+   (clojure.core/object-array [visibility]))))
 
 (def
  ^{:private true}
@@ -145,12 +137,11 @@
 
 (clojure.core/defn
  mvprintw
- "Args:[{:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true, :annotation long, :arg-symbol x} {\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol fmt}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x} {\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol fmt}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^long y ^long x fmt]
- (clojure.core/->
-  (.execute -place-of-mvprintw (clojure.core/object-array [y x fmt]))
-  .asInt))
+ (.asInt
+  (.execute -place-of-mvprintw (clojure.core/object-array [y x fmt]))))
 
 (def
  ^{:private true}
@@ -159,12 +150,10 @@
 
 (clojure.core/defn
  clear
- "Args:[], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
- (clojure.core/->
-  (.execute -place-of-clear (clojure.core/object-array []))
-  .asInt))
+ (.asInt (.execute -place-of-clear (clojure.core/object-array []))))
 
 (def
  ^{:private true}
@@ -173,14 +162,13 @@
 
 (clojure.core/defn
  getmaxx
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper {:convert wrap-pointer}, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
- (clojure.core/->
+ (.asInt
   (.execute
    -place-of-getmaxx
-   (clojure.core/object-array [(.unwrap win)]))
-  .asInt))
+   (clojure.core/object-array [(.unwrap win)]))))
 
 (def
  ^{:private true}
@@ -189,14 +177,13 @@
 
 (clojure.core/defn
  getmaxy
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper {:convert wrap-pointer}, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
- (clojure.core/->
+ (.asInt
   (.execute
    -place-of-getmaxy
-   (clojure.core/object-array [(.unwrap win)]))
-  .asInt))
+   (clojure.core/object-array [(.unwrap win)]))))
 
 (def
  ^{:private true}
@@ -205,7 +192,7 @@
 
 (clojure.core/defn
  getmaxyx
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper {:convert wrap-pointer}, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap} {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true, :annotation long, :arg-symbol x}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
+ "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
  
  [^clobits.all_targets.IVoidPointerYE win ^long y ^long x]
  (.executeVoid
@@ -219,12 +206,11 @@
 
 (clojure.core/defn
  printw
- "Args:[{\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol arg0}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol arg0}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [arg0]
- (clojure.core/->
-  (.execute -place-of-printw (clojure.core/object-array [arg0]))
-  .asInt))
+ (.asInt
+  (.execute -place-of-printw (clojure.core/object-array [arg0]))))
 
 (def
  ^{:private true}
@@ -233,12 +219,10 @@
 
 (clojure.core/defn
  refresh
- "Args:[], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
- (clojure.core/->
-  (.execute -place-of-refresh (clojure.core/object-array []))
-  .asInt))
+ (.asInt (.execute -place-of-refresh (clojure.core/object-array []))))
 
 (def
  ^{:private true}
@@ -247,12 +231,11 @@
 
 (clojure.core/defn
  wrefresh
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :ni/unwrap .unwrap, :poly/wrapper {:convert wrap-pointer}, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper {:convert clobits.wrappers.WrapVoid}, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper {:convert wrap-pointer}, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper {:type int, :convert int}, :poly/wrapper {:convert .asInt}, :poly/type int, :primitive true}"
+ "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
- (clojure.core/->
+ (.asInt
   (.execute
    -place-of-wrefresh
-   (clojure.core/object-array [(.unwrap win)]))
-  .asInt))
+   (clojure.core/object-array [(.unwrap win)]))))
 

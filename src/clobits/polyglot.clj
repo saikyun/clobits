@@ -25,35 +25,10 @@
                      (apply concat)
                      (into [])))))
 
-(comment
-  (fn [arg]
-    {:unwrap (cond
-               (= 'int (get primitives t))
-               'int
-               
-               (not (get primitives t)) '.unwrap)
-     :annotation (let [t (get-type-throw types arg)]
-                   (cond
-                     (= 'int (get primitives t))
-                     (if param-primitives
-                       'long
-                       'Long)
-                     
-                     (get primitives t)
-                     (if param-primitives
-                       t
-                       (symbol (str/upper-case (str t))))
-                     
-                     :else 'clobits.all_targets.IWrapper))
-     :arg-symbol
-     (-> arg :sym symbol)})
-  )
-
 (defn gen-defn
   "Generates a defn-call, which calls a method.
   The function resulting from evaluating the defn-call will wrap / unwrap native values / wrappers as needed."
-  [[f-sym {:keys [ret pointer sym args] :as func}]
-   {:keys [types primitives lib-name poly-wrappers poly-conversions lib-sym typing]}]
+  [[f-sym {:keys [ret pointer sym args] :as func}] {:keys [lib-sym typing]}]
   (let [f (if (= ret "void")
             '.executeVoid
             '.execute) 
@@ -80,28 +55,7 @@
                     (into []))
         
         ret-typing (get-typing-throw typing {:type ret, :pointer pointer})
-        #_{:wrapper (let [t (get-type-throw types {:type ret :pointer pointer})]
-                      (when-not (get primitives t)
-                        (when-let [w (get poly-wrappers t)]
-                          (if (map? w) (:create w) w))))
-           :annotation (let [t (get-type-throw types {:type ret :pointer pointer})]
-                         (cond
-                           (= 'int (get primitives t))
-                           'long
-                           
-                           (#{'double 'long} (get primitives t)) ;; only primitives annotateable
-                           t
-                           
-                           :else
-                           (when-let [w (get poly-wrappers t)]
-                             (if (map? w) (:type w) w))))}
-        
-        ret-annotation (get-annotation ret-typing)
-        
-        wrap-convert (fn [body]
-                       (if-let [cf (get-in ret-typing [:poly/wrapper :convert])]
-                         `(-> ~body ~cf)
-                         body))]
+        ret-annotation (get-annotation ret-typing)]
     [`(def ~(symbol (str "^" {:private true})) ~place-of-f-sym (.getMember ~lib-sym ~sym))
      `(defn ~f-sym
         ~(str "Args:" params ", "
@@ -124,18 +78,9 @@
                                                                        (list unwrap arg-symbol)
                                                                        arg-symbol))
                                                                    params))))]
-           (-> (if-let [w (:wrapper ret-typing)]
-                 `(~w ~call) ;;  not function anymore             
-                 
-                 call)
-               wrap-convert)))]))
-
-(comment
-  (-> (gen-clojure-mapping {:ret "int", :sym "SDL_Init", :args [{:type "Uint32", :sym "flags"}]}
-                           {:prefixes ["SDL"]})
-      (gen-defn {:lib-sym 'sdl-sym}))
-  ;;=> [(def init1687 (.getMember sdl-sym "SDL_Init")) (clojure.core/defn init ([flags] (.execute init1687 (clojure.core/object-array [flags]))))]
-  )
+           (if-let [w (:poly/wrapper ret-typing)]
+             `(~w ~call)
+             call)))]))
 
 (defn lib-boilerplate
   [lib-name {:keys [libs] :as opts}]
@@ -170,12 +115,58 @@
                      `(def ~context-sym (~context-f-sym))
                      `(def ~lib-sym (.eval ~context-sym (~source-f-sym)))])}))
 
+
+(defn constructors
+  [{:keys [typing structs]}]
+  (let [gen-wrappers (->> (vals typing)
+                          (into #{})
+                          (filter #(:clobits.core/generate (meta (:poly/wrapper %)))))]
+    
+    (concat
+     [(let [value-sym 'value]
+        `(defn ~(symbol "wrap-pointer") [~value-sym]
+           (reify
+             ~'clobits.all_targets.IWrapper
+             (~'unwrap [~'_]
+              ~value-sym))))]
+     
+     [(conj (map :poly/wrapper gen-wrappers) `declare)]
+     
+     (map (fn [{:keys [c-sym poly/wrapper interface]}]
+            (let [{:keys [attrs]} (structs c-sym)
+                  value-sym 'value]
+              `(defn ~(symbol wrapper) [~value-sym]
+                 ~(concat
+                   `(reify ~interface)
+                   
+                   (->> (for [{:keys [sym] :as attr} attrs
+                              :let [{:keys [poly/wrapper poly/unwrap]}
+                                    (get-typing-throw typing attr)
+                                    wrapper #(if wrapper
+                                               `(~wrapper ~%)
+                                               %)
+                                    unwrapper #(if unwrap
+                                                 `(~unwrap ~%)
+                                                 %)]]
+                          [`(~(symbol sym) [~'_]
+                             ~(wrapper `(~'.getMember ~value-sym ~sym)))
+                           
+                           `(~(symbol (str "set_" sym)) [~'_ ~'v]
+                             ~`(~'.putMember ~value-sym ~sym ~(unwrapper 'v)))])
+                        (apply concat))
+                   
+                   `(~'clobits.all_targets.IWrapper
+                     (~'unwrap [~'_]
+                      (~'.as ~value-sym ~interface)))))))
+          gen-wrappers))))
+
 (defn gen-lib*
-  [lib-name fns {:keys [append-clj] :as opts}]
+  [lib-name fns {:keys [structs] :as opts}]
   (let [bp (lib-boilerplate lib-name opts)
         defn-forms (apply concat (map #(gen-defn % (assoc opts :lib-sym (:lib-sym bp))) fns))]
     (concat (:forms bp)
-            append-clj
+            (map #(struct->gen-interface % opts) (vals structs))
+            (constructors opts)
             defn-forms)))
 
 (defn gen-lib
