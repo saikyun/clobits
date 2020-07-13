@@ -16,6 +16,14 @@ clean:
 	-rm -r classes/bindings
 	-rm -r java-src/bindings
 
+copy-test-data: bindings
+	rm -r test-example/src/
+	mkdir test-example/src
+	rm -r test-example/java-src/
+	mkdir test-example/java-src
+	cp -r src/bindings test-example/src/
+	cp -r java-src/bindings test-example/java-src/
+
 get-ni:
 	$(GRAALVM_HOME)/bin/gu install native-image || true
 
@@ -32,6 +40,14 @@ ncurses-bindings:
 bindings:
 	lein exec -ep "(require '[clobits.examples.sdl.create-sdl-lib]) (clobits.examples.sdl.create-sdl-lib/-main) (require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main) (shutdown-agents)"
 	lein with-profiles +compile-sdl compile
+
+copy-test-data: bindings
+	rm -r test-example/src/
+	mkdir test-example/src
+	rm -r test-example/java-src/
+	mkdir test-example/java-src
+	cp -r src/bindings test-example/src/
+	cp -r java-src/bindings test-example/java-src/
 
 sdl-poly: bindings
 	lein with-profiles $(OSFLAG),+sdl-poly,+socket do clean, run

@@ -83,3 +83,15 @@
   (if-let [cf (and (some? poly-conversions) (poly-conversions t))]
     cf
     (throw (Error. (str "No poly-conversions defined for type: " t ", in list " poly-conversions)))))
+
+
+(defn get-typing
+  [typing {:keys [type pointer]}]
+  (merge (get typing type)
+         (get-in typing [type pointer])))
+
+(defn get-typing-throw
+  [typing type]
+  (if-let [t (get-typing typing type)]
+    t
+    (throw (Error. (str "No type defined for type: " type)))))

@@ -1,7 +1,8 @@
 (ns clobits.examples.sdl.create-sdl-lib
   (:require [clojure.string :as str]
-            
+            [clojure.test :as t]
             [clobits.parse-c :as pc] 
+            [clobits.core :as cc]
             
             [clobits.all-targets :as at :refer [get-type-throw]]
             [clobits.util :as u]
@@ -130,6 +131,17 @@ int SDL_FillRect(SDL_Surface*    dst,
 ;;      -- perhaps should be moved to clobits.native-image
 ;;
 
+(comment ;;example of format
+  {"SDL_Event"
+   {:c-sym        "SDL_Event"
+    :interface    (symbol (str lib-name "." "ISDL_Event"))
+    :ni/interface (symbol (str lib-name ".ni." "ISDL_Event"))
+    :ni/wrapper   {:convert (symbol (str lib-name ".ni." "SDL_EventWrapper."))
+                   :type    (symbol (str lib-name ".ni." "SDL_EventWrapper"))}                 
+    :poly/wrapper {:convert (symbol (str lib-name ".poly/" "wrap-sdl-event"))}                 
+    :primitive false}}
+  )
+
 (def structs
   {"SDL_Event" {:clj-sym 'SDL_Event
                 :c-sym "SDL_Event"
@@ -156,32 +168,33 @@ int SDL_FillRect(SDL_Surface*    dst,
                        {:sym "h" :type "Uint16"}]}})
 
 (def typing
-  {"SDL_Event" {:c-sym        "SDL_Event"
-                :interface    (symbol (str lib-name "." "ISDL_Event"))
-                :ni/interface (symbol (str lib-name ".ni." "ISDL_Event"))
-                :ni/wrapper   {:convert (symbol (str lib-name ".ni." "SDL_EventWrapper."))
-                               :type    (symbol (str lib-name ".ni." "SDL_EventWrapper"))}
-                :poly/wrapper {:convert (symbol (str lib-name ".poly/" "wrap-sdl-event"))}
-                :primitive false}
-   "int"  {:ni/wrapper   {:type    'int
-                          :convert 'int}
-           :poly/wrapper {:convert '.asInt}
-           :primitive true}
-   "void" {"*" {:ni/type      'clobits.all_targets.IVoidPointer
-                :ni/wrapper   {:convert 'clobits.wrappers.WrapVoid}
-                :poly/wrapper {:convert 'clobits.wrappers/wrap-pointer}}
-           :ni/type 'void
-           :primitive true}})
-
-(defn get-typing
-  ([types type]
-   (get-typing types type nil))
-  ([types type pointer]
-   (merge (get types type)
-          (get-in types [type pointer]))))
+  (merge
+   cc/default-typing
+   
+   (->> (map key structs)
+        (map (fn [sym]
+               (let [i-sym (symbol (str lib-name "_structs." "I" sym))]
+                 [sym {:c-sym sym
+                       :interface i-sym
+                       :poly/type i-sym
+                       :ni/interface (symbol (str lib-name ".ni." "I" sym))
+                       :ni/unwrap '.unwrap
+                       :ni/wrapper   {:convert (symbol (str lib-name ".ni." sym "."))
+                                      :type    (symbol (str lib-name ".ni." sym))}
+                       :poly/unwrap '.unwrap
+                       :poly/wrapper {:convert
+                                      (symbol (str #_ lib-name #_ ".poly/" "wrap-" 
+                                                   (-> (at/java-friendly sym)
+                                                       #_(u/remove-prefixes ["SDL_"])
+                                                       str/lower-case
+                                                       u/snake->kebab)))}
+                       :primitive false}])))
+        (into {}))
+   
+   {"SDL_Window" cc/void-pointer-type}))
 
 (comment
-  (get-typing typing "void" "*")
+  (at/get-typing typing {:type "int"})
   )
 
 (def primitives
@@ -318,7 +331,7 @@ int SDL_FillRect(SDL_Surface*    dst,
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
    "SDL_PixelFormat" 'bindings.sdl_structs.ISDL_PixelFormat})
 
-(def poly-interfaces (map #(gp/struct->gen-interface poly-types % {:lib-name 'bindings.sdl}) (vals structs)))
+(def poly-interfaces (map #(gp/struct->gen-interface % {:lib-name 'bindings.sdl, :typing typing}) (vals structs)))
 
 (defn -main
   []
@@ -367,4 +380,10 @@ int SDL_FillRect(SDL_Surface*    dst,
 (comment
   (-main)
   
+  (require 'clobits.examples.sdl.create-sdl-lib :reload-all)
   )
+
+#_ (do (-main)
+       (require 'test-examples :reload-all))
+
+

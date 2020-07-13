@@ -2,91 +2,111 @@
   (:require [clojure.string :as str]
             [clobits.util :refer [add-prefix-to-sym create-subdirs! get-so-path]]
             [clobits.all-targets :refer [gen-clojure-mapping get-type-throw convert-function-throw
+                                         get-typing-throw
                                          struct-sym->interface-sym java-friendly]]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pp pprint]]))
 
 (defn attr->poly-method
-  [types {:keys [sym] :as arg}]
-  [[(symbol sym) [] (get-type-throw types arg)]
-   [(symbol (str "set_" sym)) [(get-type-throw types arg)] 'void]])
+  [typing {:keys [sym type] :as arg}]
+  (let [{:keys [poly/type]} (get-typing-throw typing arg)]
+    [[(symbol sym) [] type]
+     [(symbol (str "set_" sym)) [type] 'void]]))
 
 (defn struct->gen-interface
-  [types {:keys [clj-sym attrs]} {:keys [lib-name]}]
+  [{:keys [clj-sym attrs]} {:keys [lib-name typing]}]
   (let [java-friendly-lib-name (str/replace lib-name "-" "_")]
     `(gen-interface
       :name
       ~(symbol (str "^" {org.graalvm.polyglot.HostAccess$Implementable true}))
       ~(symbol (struct-sym->interface-sym lib-name clj-sym))
       
-      :methods ~(->> (map #(attr->poly-method types %) attrs)
+      :methods ~(->> (map #(attr->poly-method typing %) attrs)
                      (apply concat)
                      (into [])))))
+
+(comment
+  (fn [arg]
+    {:unwrap (cond
+               (= 'int (get primitives t))
+               'int
+               
+               (not (get primitives t)) '.unwrap)
+     :annotation (let [t (get-type-throw types arg)]
+                   (cond
+                     (= 'int (get primitives t))
+                     (if param-primitives
+                       'long
+                       'Long)
+                     
+                     (get primitives t)
+                     (if param-primitives
+                       t
+                       (symbol (str/upper-case (str t))))
+                     
+                     :else 'clobits.all_targets.IWrapper))
+     :arg-symbol
+     (-> arg :sym symbol)})
+  )
 
 (defn gen-defn
   "Generates a defn-call, which calls a method.
   The function resulting from evaluating the defn-call will wrap / unwrap native values / wrappers as needed."
   [[f-sym {:keys [ret pointer sym args] :as func}]
-   {:keys [types primitives lib-name poly-wrappers poly-conversions lib-sym]}]
+   {:keys [types primitives lib-name poly-wrappers poly-conversions lib-sym typing]}]
   (let [f (if (= ret "void")
             '.executeVoid
             '.execute) 
-        f-gensym (symbol (str "-place-of-" f-sym)) #_(gensym f-sym)
+        place-of-f-sym (symbol (str "-place-of-" f-sym)) #_(gensym f-sym)
         
         param-primitives (>= 4 (count args))
-        params (into [] (map (fn [arg]
-                               {:unwrap (let [t (get-type-throw types arg)]
-                                          (cond
-                                            (= 'int (get primitives t))
-                                            'int
-                                            
-                                            (not (get primitives t)) '.unwrap))
-                                :annotation (let [t (get-type-throw types arg)]
-                                              (cond
-                                                (= 'int (get primitives t))
-                                                (if param-primitives
-                                                  'long
-                                                  'Long)
-                                                
-                                                (get primitives t)
-                                                (if param-primitives
-                                                  t
-                                                  (symbol (str/upper-case (str t))))
-                                                
-                                                :else 'clobits.all_targets.IWrapper))
-                                :arg-symbol
-                                (-> arg :sym symbol)}) 
-                             (map-indexed (fn [i arg] (update arg :sym #(or % (str "arg" i)))) args)))
         
-        ret-meta {:wrapper (let [t (get-type-throw types {:type ret :pointer pointer})]
-                             (when-not (get primitives t)
-                               (when-let [w (get poly-wrappers t)]
-                                 (if (map? w) (:create w) w))))
-                  :annotation (let [t (get-type-throw types {:type ret :pointer pointer})]
-                                (cond
-                                  (= 'int (get primitives t))
-                                  'long
-                                  
-                                  (#{'double 'long} (get primitives t)) ;; only primitives annotateable
-                                  t
-                                  
-                                  :else
-                                  (when-let [w (get poly-wrappers t)]
-                                    (if (map? w) (:type w) w))))}
+        get-annotation (fn [typing]
+                         (if (not (:primitive typing))
+                           (:poly/type typing)
+                           (let [t (if (= 'int (:poly/type typing))
+                                     'long
+                                     (#{'double 'long} (:poly/type typing)))]
+                             (if param-primitives
+                               t                                        ; e.g. 'long
+                               (some-> t str str/capitalize symbol)))))    ; e.g. 'Long
         
-        conv-func (when-not (:wrapper ret-meta)
-                    (convert-function-throw poly-conversions
-                                            (get-type-throw types {:type ret
-                                                                   :pointer pointer})))                
+        params (->> args
+                    (map-indexed (fn [i arg] (update arg :sym #(or % (str "arg" i)))))
+                    (map #(let [t (get-typing-throw typing %)]
+                            (merge t
+                                   {:annotation (get-annotation t)
+                                    :arg-symbol (-> % :sym symbol)})))
+                    (into []))
+        
+        ret-typing (get-typing-throw typing {:type ret, :pointer pointer})
+        #_{:wrapper (let [t (get-type-throw types {:type ret :pointer pointer})]
+                      (when-not (get primitives t)
+                        (when-let [w (get poly-wrappers t)]
+                          (if (map? w) (:create w) w))))
+           :annotation (let [t (get-type-throw types {:type ret :pointer pointer})]
+                         (cond
+                           (= 'int (get primitives t))
+                           'long
+                           
+                           (#{'double 'long} (get primitives t)) ;; only primitives annotateable
+                           t
+                           
+                           :else
+                           (when-let [w (get poly-wrappers t)]
+                             (if (map? w) (:type w) w))))}
+        
+        ret-annotation (get-annotation ret-typing)
         
         wrap-convert (fn [body]
-                       (if (and conv-func (not= conv-func 'identity))
-                         `(-> ~body ~conv-func)
+                       (if-let [cf (get-in ret-typing [:poly/wrapper :convert])]
+                         `(-> ~body ~cf)
                          body))]
-    [`(def ~(symbol (str "^" {:private true})) ~f-gensym (.getMember ~lib-sym ~sym))
+    [`(def ~(symbol (str "^" {:private true})) ~place-of-f-sym (.getMember ~lib-sym ~sym))
      `(defn ~f-sym
-        ~(str "Ret: " ret-meta) ;; this docstring is just for fun
-        ~(if-let [a (:annotation ret-meta)]
+        ~(str "Args:" params ", "
+              "Ret: " ret-typing) ;; this docstring is just for fun
+        ~(if-let [a ret-annotation]
            (symbol (str "^" a))
            (symbol "") ;; please forgive me (no annotation on return value)
            )
@@ -96,14 +116,15 @@
                         (symbol (str "^" annotation)))
                       arg-symbol]))
               flatten
+              (filter some?)
               (into []))
-        ~(let [call `(~f ~f-gensym (object-array ~(into []
-                                                        (map (fn [{:keys [unwrap arg-symbol]}]
-                                                               (if unwrap
-                                                                 (list unwrap arg-symbol)
-                                                                 arg-symbol))
-                                                             params))))]
-           (-> (if-let [w (:wrapper ret-meta)]
+        ~(let [call `(~f ~place-of-f-sym (object-array ~(into []
+                                                              (map (fn [{:keys [poly/unwrap arg-symbol]}]
+                                                                     (if unwrap
+                                                                       (list unwrap arg-symbol)
+                                                                       arg-symbol))
+                                                                   params))))]
+           (-> (if-let [w (:wrapper ret-typing)]
                  `(~w ~call) ;;  not function anymore             
                  
                  call)
@@ -119,9 +140,9 @@
 (defn lib-boilerplate
   [lib-name {:keys [libs] :as opts}]
   (let [lib-sym 'polyglot-lib #_ (gensym (str "lib"))
-        context-f-sym (gensym "context-f") 
+        context-f-sym 'context-f #_ (gensym "context-f") 
         context-sym  'polyglot-context
-        source-f-sym (gensym "source-f")
+        source-f-sym 'source-f #_ (gensym "source-f")
         so-path (get-so-path opts)]
     {:lib-name lib-name
      :libs libs

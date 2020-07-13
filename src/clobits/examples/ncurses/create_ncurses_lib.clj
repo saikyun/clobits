@@ -1,5 +1,6 @@
 (ns clobits.examples.ncurses.create-ncurses-lib
   (:require [clojure.string :as str]
+            [clobits.core :as cc]
             
             [clobits.parse-c :as pc] 
             
@@ -45,6 +46,10 @@
 (def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name lib-name}) (vals structs)))
 (def poly-interfaces (map #(gp/struct->gen-interface types % {:lib-name lib-name}) (vals structs)))
 
+(def typing
+  (merge cc/default-typing
+         {"WINDOW" cc/void-pointer-type}))
+
 (def conversion-functions
   {'int '.asInt
    'org.graalvm.nativeimage.c.type.VoidPointer 'identity
@@ -58,6 +63,7 @@
   
   (println "Generating" lib-name)
   (let [opts {:inline-c (str/join "\n" functions)
+              :typing typing
               :protos (concat (map pc/parse-c-prototype functions)
                               (map pc/parse-c-prototype prototypes))
               :structs structs
