@@ -6,7 +6,9 @@
   :resources ["src" "libs"]
   :resource-paths ["classes"]
   
-  :profiles {:with-java {:java-source-paths ["java-src"]
+  :profiles {:compare-files {:dependencies [[digest "1.4.9"]]}
+
+             :with-java {:java-source-paths ["java-src"]
                          :aot :all}
              
              :compile-clobits {:aot [clobits.all-targets]

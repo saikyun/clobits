@@ -23,13 +23,15 @@ info:
 	native-image --expert-options-all
 
 sdl-bindings:
-	lein exec -ep "(require '[clobits.examples.sdl.create-sdl-lib]) (clobits.examples.sdl.create-sdl-lib/-main)"
+	lein exec -ep "(require '[clobits.examples.sdl.create-sdl-lib]) (clobits.examples.sdl.create-sdl-lib/-main) (shutdown-agents)"
 	lein with-profiles +compile-sdl compile
 
 ncurses-bindings:
-	lein exec -ep "(require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main)"
+	lein exec -ep "(require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main) (shutdown-agents)"
 
-bindings: sdl-bindings ncurses-bindings
+bindings:
+	lein exec -ep "(require '[clobits.examples.sdl.create-sdl-lib]) (clobits.examples.sdl.create-sdl-lib/-main) (require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main) (shutdown-agents)"
+	lein with-profiles +compile-sdl compile
 
 sdl-poly: bindings
 	lein with-profiles $(OSFLAG),+sdl-poly,+socket do clean, run

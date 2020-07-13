@@ -24,7 +24,7 @@
 (defn wrap-char*
   [args ret-f]
   (let [char-args (filter is-char*? args)
-        new-syms (into {} (map #(vector (:sym %) (gensym (:sym %))) char-args))
+        new-syms (into {} (map-indexed #(vector (:sym %2) (str "_wrap_" (:sym %2) %1)) char-args))
         declarations (map #(str (apply str (:prefixes %)) " char *" (new-syms (:sym %)) ";") char-args)
         setters (map #(let [new-sym (new-syms (:sym %))]
                         (str

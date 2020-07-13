@@ -130,9 +130,6 @@ int SDL_FillRect(SDL_Surface*    dst,
 ;;      -- perhaps should be moved to clobits.native-image
 ;;
 
-
-
-
 (def structs
   {"SDL_Event" {:clj-sym 'SDL_Event
                 :c-sym "SDL_Event"
@@ -157,6 +154,35 @@ int SDL_FillRect(SDL_Surface*    dst,
                        {:sym "y" :type "Sint16"}
                        {:sym "w" :type "Uint16"}
                        {:sym "h" :type "Uint16"}]}})
+
+(def typing
+  {"SDL_Event" {:c-sym        "SDL_Event"
+                :interface    (symbol (str lib-name "." "ISDL_Event"))
+                :ni/interface (symbol (str lib-name ".ni." "ISDL_Event"))
+                :ni/wrapper   {:convert (symbol (str lib-name ".ni." "SDL_EventWrapper."))
+                               :type    (symbol (str lib-name ".ni." "SDL_EventWrapper"))}
+                :poly/wrapper {:convert (symbol (str lib-name ".poly/" "wrap-sdl-event"))}
+                :primitive false}
+   "int"  {:ni/wrapper   {:type    'int
+                          :convert 'int}
+           :poly/wrapper {:convert '.asInt}
+           :primitive true}
+   "void" {"*" {:ni/type      'clobits.all_targets.IVoidPointer
+                :ni/wrapper   {:convert 'clobits.wrappers.WrapVoid}
+                :poly/wrapper {:convert 'clobits.wrappers/wrap-pointer}}
+           :ni/type 'void
+           :primitive true}})
+
+(defn get-typing
+  ([types type]
+   (get-typing types type nil))
+  ([types type pointer]
+   (merge (get types type)
+          (get-in types [type pointer]))))
+
+(comment
+  (get-typing typing "void" "*")
+  )
 
 (def primitives
   #{'int 'long 'char 'void})
@@ -311,6 +337,7 @@ int SDL_FillRect(SDL_Surface*    dst,
                                   constructors)
               :append-ni ni-interfaces
               :primitives primitives
+              :typing typing
               :types types
               :wrappers wrappers
               :poly-wrappers poly-wrappers
@@ -334,7 +361,7 @@ int SDL_FillRect(SDL_Surface*    dst,
   
   (println "Done!")
   
-  (shutdown-agents) ;; need this when running lein exec
+  ;;(shutdown-agents) ;; need this when running lein exec
   )
 
 (comment

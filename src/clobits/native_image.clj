@@ -397,6 +397,8 @@ public class " classname " implements I" (java-friendly clj-sym) ", IWrapperNI {
 (defn persist-lib
   [{:keys [ni-code wrapper-code java-code lib-name] :as opts}]
   
+  (println "Persisting native image clj.")  
+
   (with-open [wrtr (io/writer (str "src"
                                    "/"
                                    (snake-case (str/replace (str lib-name) "." "/")) "_wrapper.clj"))]

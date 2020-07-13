@@ -59,5 +59,5 @@
                   []
                   (butlast (str/split path #"/")))
                  (map #(io/file (str (System/getProperty "user.dir") "/" %))))]
-    (println "Creating dir" d)
+    #_ (println "Creating dir" d)
     (.mkdir d)))
