@@ -11,7 +11,7 @@
 (def ^{:private true} empty-array (clojure.core/object-array 0))
 
 (clojure.core/defn
- context-f589
+ context-f538
  []
  (clojure.core/->
   (org.graalvm.polyglot.Context/newBuilder
@@ -21,7 +21,7 @@
 
 (clojure.core/defn
  ^{:private true}
- source-f590
+ source-f539
  []
  (clojure.core/->
   (org.graalvm.polyglot.Source/newBuilder
@@ -32,9 +32,9 @@
     "libs/libbindings$sdl.so"))
   (.build)))
 
-(def polyglot-context (context-f589))
+(def polyglot-context (context-f538))
 
-(def polyglot-lib (.eval polyglot-context (source-f590)))
+(def polyglot-lib (.eval polyglot-context (source-f539)))
 
 (clojure.core/gen-interface
  :name

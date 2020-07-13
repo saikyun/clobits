@@ -1,5 +1,6 @@
 (defproject clobits "0.1.0"
-  :dependencies [[org.clojure/clojure "1.10.1"]]
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [digest "1.4.9"]]
   :plugins [[lein-exec "0.3.7"]]
   :source-paths ["src"]
   :jvm-opts []
@@ -7,7 +8,7 @@
   :resource-paths ["classes"]
   
   :profiles {:compare-files {:dependencies [[digest "1.4.9"]]}
-
+             
              :with-java {:java-source-paths ["java-src"]
                          :aot :all}
              
