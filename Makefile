@@ -34,7 +34,7 @@ bindings:
 	lein with-profiles +compile-sdl compile
 
 dev-repl:
-	lein with-profiles +socket,+compare-files repl
+	REPLING=true lein with-profiles +socket,+compare-files repl
 
 copy-test-data: bindings
 	rm -r test-example/src/

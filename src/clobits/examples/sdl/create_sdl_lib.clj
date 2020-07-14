@@ -175,13 +175,15 @@ int SDL_FillRect(SDL_Surface*    dst,
         (map (fn [sym]
                (let [i-sym (symbol (str lib-name "_structs." "I" sym))]
                  [sym {:c-sym sym
-                       :interface i-sym
-                       :poly/type i-sym
-                       :ni/interface (symbol (str lib-name ".ni." "I" sym))
-                       :ni/unwrap '.unwrap
-                       :ni/wrapper   {:convert (symbol (str lib-name ".ni." sym "."))
-                                      :type    (symbol (str lib-name ".ni." sym))}
-                       :poly/unwrap '.unwrap
+                       :primitive    false
+                       :interface    i-sym
+                       :poly/type    i-sym
+                       :ni/interface (symbol (str lib-name "_ni_generated." sym))
+                       :ni/unwrap    '.unwrap
+                       :ni/wrapper   (symbol (str lib-name "_ni_generated.Wrap" sym))
+                       :ni/java-wrapper   (str "new " lib-name "_ni_generated.Wrap" sym)
+                       :ni/type      (symbol (str lib-name "_ni_generated." sym))
+                       :poly/unwrap  '.unwrap
                        :poly/wrapper
                        (with-meta
                          (symbol (str #_ lib-name #_ ".poly/" "wrap-" 
@@ -189,8 +191,7 @@ int SDL_FillRect(SDL_Surface*    dst,
                                           #_(u/remove-prefixes ["SDL_"])
                                           str/lower-case
                                           u/snake->kebab)))
-                         {:clobits.core/generate true})
-                       :primitive false}])))
+                         {:clobits.core/generate true})}])))
         (into {}))
    
    {"SDL_Window" cc/void-pointer-type}))
@@ -239,7 +240,32 @@ int SDL_FillRect(SDL_Surface*    dst,
           'org.graalvm.nativeimage.c.type.CCharPointer
           'clobits.wrappers.WrapPointer}))
 
-(def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name 'bindings.sdl, :primitives primitives}) (vals structs)))
+(def opts
+  {:inline-c (str/join "\n" functions)
+   :protos (concat (map pc/parse-c-prototype functions)
+                   (map pc/parse-c-prototype prototypes) ;; utility function for turning c-prototypes into clojure data
+                   [{:ret "void", :sym "SDL_Quit"}] ;; we can also just provide the data manually
+                   )
+   
+   :ni/class-name (symbol (at/java-friendly lib-name))
+   :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))
+   :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))
+   :c-lib-name    (u/so-lib-name-ni lib-name)
+   
+   :structs structs
+   :includes ["stdio.h" "SDL2/SDL.h"]
+   :typing typing
+   :lib-name lib-name
+   :src-dir "src"
+   :lib-dir "libs"
+   :libs ["SDL2"]
+   
+   ;; obsolete
+   :primitives primitives    
+   :types types   
+   :wrappers wrappers})
+
+(def ni-interfaces (map #(ni/struct->gen-interface % opts) (vals structs)))
 
 (defn -main
   []
@@ -247,32 +273,14 @@ int SDL_FillRect(SDL_Surface*    dst,
   (.mkdir (java.io.File. "libs"))
   
   (println "Generating bindings.sdl")
-  (let [opts {:inline-c (str/join "\n" functions)
-              :protos (concat (map pc/parse-c-prototype functions)
-                              (map pc/parse-c-prototype prototypes) ;; utility function for turning c-prototypes into clojure data
-                              [{:ret "void", :sym "SDL_Quit"}] ;; we can also just provide the data manually
-                              )
-              :structs structs
-              :includes ["stdio.h" "SDL2/SDL.h"]
-              :append-ni ni-interfaces
-              :primitives primitives
-              :typing typing
-              :types types
-              :wrappers wrappers
-              :lib-name lib-name
-              :src-dir "src"
-              :lib-dir "libs"
-              :libs ["SDL2"]}
+  (let [opts (assoc opts :append-ni ni-interfaces)
         opts (merge opts (gcee/gen-lib opts))
         _ (gcee/persist-lib! opts)
         opts (gp/gen-lib opts)
         opts (gp/persist-lib opts)
         opts (assoc opts :ni-code (ni/gen-lib opts))
         opts (assoc opts :wrapper-code (ni/gen-wrapper-ns opts))
-        opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class
-                                           types
-                                           %
-                                           opts) (vals structs)))
+        opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class % opts) (vals structs)))
         opts (ni/persist-lib opts)]
     opts)
   
@@ -287,8 +295,9 @@ int SDL_FillRect(SDL_Surface*    dst,
   (require 'clobits.examples.sdl.create-sdl-lib :reload-all)
   )
 
-(do (-main)
-    (load-file "src/bindings/sdl_ns.clj")
-    (load-file "test-src/test_examples.clj"))
+(when (System/getenv "REPLING")
+  (do (-main)
+      (load-file "src/bindings/sdl_ns.clj")
+      (load-file "test-src/test_examples.clj")))
 
 

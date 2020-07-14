@@ -36,6 +36,13 @@
 
 (def polyglot-lib (.eval polyglot-context (source-f)))
 
+(clojure.core/defn
+ wrap-pointer
+ [value]
+ (clojure.core/reify clobits.all_targets.IWrapper (unwrap [_] value)))
+
+(clojure.core/declare)
+
 (def
  ^{:private true}
  -place-of-free
@@ -43,7 +50,7 @@
 
 (clojure.core/defn
  free
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol ptr, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol ptr, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {\"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/type void, :primitive true}"
  
  [^clobits.all_targets.IVoidPointerYE ptr]
  (.executeVoid
@@ -57,7 +64,7 @@
 
 (clojure.core/defn
  malloc
- "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol size}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type clobits.all_targets.IVoidPointer, :primitive false, :poly/type clobits.all_targets.IVoidPointerYE, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap}"
+ "Args:[{:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol size}], Ret: {:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}"
  ^clobits.all_targets.IVoidPointerYE
  [^long size]
  (wrap-pointer
@@ -70,7 +77,7 @@
 
 (clojure.core/defn
  initscr
- "Args:[], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}"
+ "Args:[], Ret: {:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}"
  ^clobits.all_targets.IVoidPointerYE
  []
  (wrap-pointer
@@ -83,7 +90,7 @@
 
 (clojure.core/defn
  delwin
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
  (.asInt
@@ -98,7 +105,7 @@
 
 (clojure.core/defn
  endwin
- "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
  (.asInt (.execute -place-of-endwin (clojure.core/object-array []))))
@@ -110,7 +117,7 @@
 
 (clojure.core/defn
  noecho
- "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
  (.asInt (.execute -place-of-noecho (clojure.core/object-array []))))
@@ -122,7 +129,7 @@
 
 (clojure.core/defn
  curs-set
- "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol visibility}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol visibility}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^long visibility]
  (.asInt
@@ -137,7 +144,7 @@
 
 (clojure.core/defn
  mvprintw
- "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x} {\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol fmt}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x} {\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :annotation nil, :arg-symbol fmt}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^long y ^long x fmt]
  (.asInt
@@ -150,7 +157,7 @@
 
 (clojure.core/defn
  clear
- "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
  (.asInt (.execute -place-of-clear (clojure.core/object-array []))))
@@ -162,7 +169,7 @@
 
 (clojure.core/defn
  getmaxx
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
  (.asInt
@@ -177,7 +184,7 @@
 
 (clojure.core/defn
  getmaxy
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
  (.asInt
@@ -192,7 +199,7 @@
 
 (clojure.core/defn
  getmaxyx
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x}], Ret: {\"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/type void, :primitive true}"
  
  [^clobits.all_targets.IVoidPointerYE win ^long y ^long x]
  (.executeVoid
@@ -206,7 +213,7 @@
 
 (clojure.core/defn
  printw
- "Args:[{\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol arg0}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :annotation nil, :arg-symbol arg0}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [arg0]
  (.asInt
@@ -219,7 +226,7 @@
 
 (clojure.core/defn
  refresh
- "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
  (.asInt (.execute -place-of-refresh (clojure.core/object-array []))))
@@ -231,7 +238,7 @@
 
 (clojure.core/defn
  wrefresh
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol win, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE win]
  (.asInt

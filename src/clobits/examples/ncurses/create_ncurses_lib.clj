@@ -3,7 +3,8 @@
             [clobits.core :as cc]
             
             [clobits.parse-c :as pc] 
-            
+            [clobits.util :as u]
+            [clobits.all-targets :as at]
             [clobits.native-image :as ni]
             [clobits.polyglot :as gp]
             [clobits.gen-c :as gcee]
@@ -66,6 +67,12 @@
               :typing typing
               :protos (concat (map pc/parse-c-prototype functions)
                               (map pc/parse-c-prototype prototypes))
+              
+              :ni/class-name (symbol (at/java-friendly lib-name))
+              :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))
+              :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))
+              :c-lib-name    (u/so-lib-name-ni lib-name)              
+              
               :structs structs
               :includes ["ncurses.h" "stdlib.h" "string.h"]
               :append-clj poly-interfaces

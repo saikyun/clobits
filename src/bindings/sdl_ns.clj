@@ -97,28 +97,24 @@
  (clojure.core/reify clobits.all_targets.IWrapper (unwrap [_] value)))
 
 (clojure.core/declare
- wrap-sdl-rect
+ wrap-sdl-event
  wrap-sdl-keyboardevent
  wrap-sdl-keysym
- wrap-sdl-surface
  wrap-sdl-pixelformat
- wrap-sdl-event)
+ wrap-sdl-rect
+ wrap-sdl-surface)
 
 (clojure.core/defn
- wrap-sdl-rect
+ wrap-sdl-event
  [value]
  (clojure.core/reify
-  bindings.sdl_structs.ISDL_Rect
-  (x [_] (.asInt (.getMember value "x")))
-  (set_x [_ v] (.putMember value "x" v))
-  (y [_] (.asInt (.getMember value "y")))
-  (set_y [_ v] (.putMember value "y" v))
-  (w [_] (.asInt (.getMember value "w")))
-  (set_w [_ v] (.putMember value "w" v))
-  (h [_] (.asInt (.getMember value "h")))
-  (set_h [_ v] (.putMember value "h" v))
+  bindings.sdl_structs.ISDL_Event
+  (type [_] (.asInt (.getMember value "type")))
+  (set_type [_ v] (.putMember value "type" v))
+  (key [_] (wrap-sdl-keyboardevent (.getMember value "key")))
+  (set_key [_ v] (.putMember value "key" (.unwrap v)))
   clobits.all_targets.IWrapper
-  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Rect))))
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Event))))
 
 (clojure.core/defn
  wrap-sdl-keyboardevent
@@ -141,16 +137,6 @@
   (unwrap [_] (.as value bindings.sdl_structs.ISDL_Keysym))))
 
 (clojure.core/defn
- wrap-sdl-surface
- [value]
- (clojure.core/reify
-  bindings.sdl_structs.ISDL_Surface
-  (format [_] (wrap-sdl-pixelformat (.getMember value "format")))
-  (set_format [_ v] (.putMember value "format" (.unwrap v)))
-  clobits.all_targets.IWrapper
-  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Surface))))
-
-(clojure.core/defn
  wrap-sdl-pixelformat
  [value]
  (clojure.core/reify
@@ -161,16 +147,30 @@
   (unwrap [_] (.as value bindings.sdl_structs.ISDL_PixelFormat))))
 
 (clojure.core/defn
- wrap-sdl-event
+ wrap-sdl-rect
  [value]
  (clojure.core/reify
-  bindings.sdl_structs.ISDL_Event
-  (type [_] (.asInt (.getMember value "type")))
-  (set_type [_ v] (.putMember value "type" v))
-  (key [_] (wrap-sdl-keyboardevent (.getMember value "key")))
-  (set_key [_ v] (.putMember value "key" (.unwrap v)))
+  bindings.sdl_structs.ISDL_Rect
+  (x [_] (.asInt (.getMember value "x")))
+  (set_x [_ v] (.putMember value "x" v))
+  (y [_] (.asInt (.getMember value "y")))
+  (set_y [_ v] (.putMember value "y" v))
+  (w [_] (.asInt (.getMember value "w")))
+  (set_w [_ v] (.putMember value "w" v))
+  (h [_] (.asInt (.getMember value "h")))
+  (set_h [_ v] (.putMember value "h" v))
   clobits.all_targets.IWrapper
-  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Event))))
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Rect))))
+
+(clojure.core/defn
+ wrap-sdl-surface
+ [value]
+ (clojure.core/reify
+  bindings.sdl_structs.ISDL_Surface
+  (format [_] (wrap-sdl-pixelformat (.getMember value "format")))
+  (set_format [_ v] (.putMember value "format" (.unwrap v)))
+  clobits.all_targets.IWrapper
+  (unwrap [_] (.as value bindings.sdl_structs.ISDL_Surface))))
 
 (def
  ^{:private true}
@@ -179,7 +179,7 @@
 
 (clojure.core/defn
  get-sdl-init-video
- "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
  (.asInt
@@ -194,7 +194,7 @@
 
 (clojure.core/defn
  get-sdl-window-shown
- "Args:[], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  []
  (.asInt
@@ -209,7 +209,7 @@
 
 (clojure.core/defn
  get-null
- "Args:[], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type clobits.all_targets.IVoidPointer, :primitive false, :poly/type clobits.all_targets.IVoidPointerYE, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap}"
+ "Args:[], Ret: {:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}"
  ^clobits.all_targets.IVoidPointerYE
  []
  (wrap-pointer
@@ -222,7 +222,7 @@
 
 (clojure.core/defn
  gen-title
- "Args:[], Ret: {\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false}"
+ "Args:[], Ret: {\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap}"
  
  []
  (.execute -place-of-gen-title (clojure.core/object-array [])))
@@ -234,7 +234,7 @@
 
 (clojure.core/defn
  create-rect
- "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol w} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol h}], Ret: {:interface bindings.sdl_structs.ISDL_Rect, :c-sym \"SDL_Rect\", :ni/interface bindings.sdl.ni.ISDL_Rect, :ni/wrapper {:convert bindings.sdl.ni.SDL_Rect., :type bindings.sdl.ni.SDL_Rect}, :poly/type bindings.sdl_structs.ISDL_Rect, :poly/unwrap .unwrap, :primitive false, :poly/wrapper wrap-sdl-rect, :ni/unwrap .unwrap}"
+ "Args:[{:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol x} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol y} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol w} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol h}], Ret: {:interface bindings.sdl_structs.ISDL_Rect, :c-sym \"SDL_Rect\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_Rect\", :ni/interface bindings.sdl_ni_generated.SDL_Rect, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_Rect, :poly/type bindings.sdl_structs.ISDL_Rect, :poly/unwrap .unwrap, :primitive false, :ni/type bindings.sdl_ni_generated.SDL_Rect, :poly/wrapper wrap-sdl-rect, :ni/unwrap .unwrap}"
  ^bindings.sdl_structs.ISDL_Rect
  [^long x ^long y ^long w ^long h]
  (wrap-sdl-rect
@@ -249,7 +249,7 @@
 
 (clojure.core/defn
  get-e
- "Args:[], Ret: {:interface bindings.sdl_structs.ISDL_Event, :c-sym \"SDL_Event\", :ni/interface bindings.sdl.ni.ISDL_Event, :ni/wrapper {:convert bindings.sdl.ni.SDL_Event., :type bindings.sdl.ni.SDL_Event}, :poly/type bindings.sdl_structs.ISDL_Event, :poly/unwrap .unwrap, :primitive false, :poly/wrapper wrap-sdl-event, :ni/unwrap .unwrap}"
+ "Args:[], Ret: {:interface bindings.sdl_structs.ISDL_Event, :c-sym \"SDL_Event\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_Event\", :ni/interface bindings.sdl_ni_generated.SDL_Event, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_Event, :poly/type bindings.sdl_structs.ISDL_Event, :poly/unwrap .unwrap, :primitive false, :ni/type bindings.sdl_ni_generated.SDL_Event, :poly/wrapper wrap-sdl-event, :ni/unwrap .unwrap}"
  ^bindings.sdl_structs.ISDL_Event
  []
  (wrap-sdl-event
@@ -262,7 +262,7 @@
 
 (clojure.core/defn
  init
- "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol flags}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol flags}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^long flags]
  (.asInt (.execute -place-of-init (clojure.core/object-array [flags]))))
@@ -274,7 +274,7 @@
 
 (clojure.core/defn
  poll-event
- "Args:[{:interface bindings.sdl_structs.ISDL_Event, :c-sym \"SDL_Event\", :ni/interface bindings.sdl.ni.ISDL_Event, :ni/wrapper {:convert bindings.sdl.ni.SDL_Event., :type bindings.sdl.ni.SDL_Event}, :poly/type bindings.sdl_structs.ISDL_Event, :poly/unwrap .unwrap, :primitive false, :arg-symbol event, :poly/wrapper wrap-sdl-event, :annotation bindings.sdl_structs.ISDL_Event, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface bindings.sdl_structs.ISDL_Event, :c-sym \"SDL_Event\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_Event\", :ni/interface bindings.sdl_ni_generated.SDL_Event, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_Event, :poly/type bindings.sdl_structs.ISDL_Event, :poly/unwrap .unwrap, :primitive false, :arg-symbol event, :ni/type bindings.sdl_ni_generated.SDL_Event, :poly/wrapper wrap-sdl-event, :annotation bindings.sdl_structs.ISDL_Event, :ni/unwrap .unwrap}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^bindings.sdl_structs.ISDL_Event event]
  (.asInt
@@ -289,7 +289,7 @@
 
 (clojure.core/defn
  delay
- "Args:[{:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol ms}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
+ "Args:[{:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol ms}], Ret: {\"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/type void, :primitive true}"
  
  [^long ms]
  (.executeVoid -place-of-delay (clojure.core/object-array [ms])))
@@ -301,7 +301,7 @@
 
 (clojure.core/defn
  update-window-surface
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol window, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol window, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^clobits.all_targets.IVoidPointerYE window]
  (.asInt
@@ -316,7 +316,7 @@
 
 (clojure.core/defn
  get-window-surface
- "Args:[{\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol window, :ni/type clobits.all_targets.IVoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:interface bindings.sdl_structs.ISDL_Surface, :c-sym \"SDL_Surface\", :ni/interface bindings.sdl.ni.ISDL_Surface, :ni/wrapper {:convert bindings.sdl.ni.SDL_Surface., :type bindings.sdl.ni.SDL_Surface}, :poly/type bindings.sdl_structs.ISDL_Surface, :poly/unwrap .unwrap, :primitive false, :poly/wrapper wrap-sdl-surface, :ni/unwrap .unwrap}"
+ "Args:[{:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :arg-symbol window, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :annotation clobits.all_targets.IVoidPointerYE, :ni/unwrap .unwrap}], Ret: {:interface bindings.sdl_structs.ISDL_Surface, :c-sym \"SDL_Surface\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_Surface\", :ni/interface bindings.sdl_ni_generated.SDL_Surface, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_Surface, :poly/type bindings.sdl_structs.ISDL_Surface, :poly/unwrap .unwrap, :primitive false, :ni/type bindings.sdl_ni_generated.SDL_Surface, :poly/wrapper wrap-sdl-surface, :ni/unwrap .unwrap}"
  ^bindings.sdl_structs.ISDL_Surface
  [^clobits.all_targets.IVoidPointerYE window]
  (wrap-sdl-surface
@@ -331,7 +331,7 @@
 
 (clojure.core/defn
  map-rgb
- "Args:[{:interface bindings.sdl_structs.ISDL_PixelFormat, :c-sym \"SDL_PixelFormat\", :ni/interface bindings.sdl.ni.ISDL_PixelFormat, :ni/wrapper {:convert bindings.sdl.ni.SDL_PixelFormat., :type bindings.sdl.ni.SDL_PixelFormat}, :poly/type bindings.sdl_structs.ISDL_PixelFormat, :poly/unwrap .unwrap, :primitive false, :arg-symbol format, :poly/wrapper wrap-sdl-pixelformat, :annotation bindings.sdl_structs.ISDL_PixelFormat, :ni/unwrap .unwrap} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol r} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol g} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol b}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface bindings.sdl_structs.ISDL_PixelFormat, :c-sym \"SDL_PixelFormat\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_PixelFormat\", :ni/interface bindings.sdl_ni_generated.SDL_PixelFormat, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_PixelFormat, :poly/type bindings.sdl_structs.ISDL_PixelFormat, :poly/unwrap .unwrap, :primitive false, :arg-symbol format, :ni/type bindings.sdl_ni_generated.SDL_PixelFormat, :poly/wrapper wrap-sdl-pixelformat, :annotation bindings.sdl_structs.ISDL_PixelFormat, :ni/unwrap .unwrap} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol r} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol g} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol b}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^bindings.sdl_structs.ISDL_PixelFormat
   format
@@ -353,7 +353,7 @@
 
 (clojure.core/defn
  create-window
- "Args:[{\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :annotation nil, :arg-symbol title} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol x} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol y} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol w} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol h} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol flags}], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}"
+ "Args:[{\"*\" {:ni/type org.graalvm.nativeimage.c.type.CCharPointer, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :poly/type nil, :primitive false}, :poly/type nil, :ni/type org.graalvm.nativeimage.c.type.CCharPointer, :primitive false, :ni/wrapper clobits.wrappers.WrapPointer, :ni/unwrap .unwrap, :annotation nil, :arg-symbol title} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol x} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol y} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol w} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol h} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation Long, :arg-symbol flags}], Ret: {:interface clobits.all_targets.IVoidPointerYE, \"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}"
  ^clobits.all_targets.IVoidPointerYE
  [title ^Long x ^Long y ^Long w ^Long h ^Long flags]
  (wrap-pointer
@@ -368,7 +368,7 @@
 
 (clojure.core/defn
  fill-rect
- "Args:[{:interface bindings.sdl_structs.ISDL_Surface, :c-sym \"SDL_Surface\", :ni/interface bindings.sdl.ni.ISDL_Surface, :ni/wrapper {:convert bindings.sdl.ni.SDL_Surface., :type bindings.sdl.ni.SDL_Surface}, :poly/type bindings.sdl_structs.ISDL_Surface, :poly/unwrap .unwrap, :primitive false, :arg-symbol dst, :poly/wrapper wrap-sdl-surface, :annotation bindings.sdl_structs.ISDL_Surface, :ni/unwrap .unwrap} {:interface bindings.sdl_structs.ISDL_Rect, :c-sym \"SDL_Rect\", :ni/interface bindings.sdl.ni.ISDL_Rect, :ni/wrapper {:convert bindings.sdl.ni.SDL_Rect., :type bindings.sdl.ni.SDL_Rect}, :poly/type bindings.sdl_structs.ISDL_Rect, :poly/unwrap .unwrap, :primitive false, :arg-symbol rect, :poly/wrapper wrap-sdl-rect, :annotation bindings.sdl_structs.ISDL_Rect, :ni/unwrap .unwrap} {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol color}], Ret: {:ni/wrapper int, :ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
+ "Args:[{:interface bindings.sdl_structs.ISDL_Surface, :c-sym \"SDL_Surface\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_Surface\", :ni/interface bindings.sdl_ni_generated.SDL_Surface, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_Surface, :poly/type bindings.sdl_structs.ISDL_Surface, :poly/unwrap .unwrap, :primitive false, :arg-symbol dst, :ni/type bindings.sdl_ni_generated.SDL_Surface, :poly/wrapper wrap-sdl-surface, :annotation bindings.sdl_structs.ISDL_Surface, :ni/unwrap .unwrap} {:interface bindings.sdl_structs.ISDL_Rect, :c-sym \"SDL_Rect\", :ni/java-wrapper \"new bindings.sdl_ni_generated.WrapSDL_Rect\", :ni/interface bindings.sdl_ni_generated.SDL_Rect, :ni/wrapper bindings.sdl_ni_generated.WrapSDL_Rect, :poly/type bindings.sdl_structs.ISDL_Rect, :poly/unwrap .unwrap, :primitive false, :arg-symbol rect, :ni/type bindings.sdl_ni_generated.SDL_Rect, :poly/wrapper wrap-sdl-rect, :annotation bindings.sdl_structs.ISDL_Rect, :ni/unwrap .unwrap} {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true, :annotation long, :arg-symbol color}], Ret: {:ni/type int, :poly/wrapper .asInt, :poly/type int, :primitive true}"
  ^long
  [^bindings.sdl_structs.ISDL_Surface
   dst
@@ -388,7 +388,7 @@
 
 (clojure.core/defn
  quit
- "Args:[], Ret: {\"*\" {:poly/type clobits.all_targets.IVoidPointerYE, :ni/type clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :ni/unwrap .unwrap, :poly/wrapper wrap-pointer, :poly/unwrap .unwrap, :primitive false}, :ni/type void, :primitive true}"
+ "Args:[], Ret: {\"*\" {:interface clobits.all_targets.IVoidPointerYE, :ni/java-wrapper \"new clobits.wrappers.WrapVoid\", :ni/interface clobits.all_targets.IVoidPointer, :ni/wrapper clobits.wrappers.WrapVoid, :poly/type clobits.all_targets.IVoidPointerYE, :poly/unwrap .unwrap, :primitive false, :ni/type org.graalvm.nativeimage.c.type.VoidPointer, :poly/wrapper wrap-pointer, :ni/unwrap .unwrap}, :ni/type void, :primitive true}"
  
  []
  (.executeVoid -place-of-quit (clojure.core/object-array [])))

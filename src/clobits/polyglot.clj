@@ -115,11 +115,11 @@
                      `(def ~context-sym (~context-f-sym))
                      `(def ~lib-sym (.eval ~context-sym (~source-f-sym)))])}))
 
-
 (defn constructors
   [{:keys [typing structs]}]
   (let [gen-wrappers (->> (vals typing)
                           (into #{})
+                          (sort-by :c-sym)
                           (filter #(:clobits.core/generate (meta (:poly/wrapper %)))))]
     
     (concat
@@ -130,7 +130,7 @@
              (~'unwrap [~'_]
               ~value-sym))))]
      
-     [(conj (map :poly/wrapper gen-wrappers) `declare)]
+     [(conj (sort (map :poly/wrapper gen-wrappers)) `declare)]
      
      (map (fn [{:keys [c-sym poly/wrapper interface]}]
             (let [{:keys [attrs]} (structs c-sym)

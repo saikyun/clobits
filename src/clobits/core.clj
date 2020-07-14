@@ -1,14 +1,17 @@
 (ns clobits.core)
 
-(def int-type {:ni/wrapper 'int
+(def int-type {#_#_:ni/wrapper 'int
                :ni/type 'int
                :poly/wrapper '.asInt
                :poly/type 'int
                :primitive true})
 
-(def void-pointer-type {"*" {:poly/type    'clobits.all_targets.IVoidPointerYE
-                             :ni/type      'clobits.all_targets.IVoidPointer
+(def void-pointer-type {"*" {:interface    'clobits.all_targets.IVoidPointerYE
+                             :poly/type    'clobits.all_targets.IVoidPointerYE
+                             :ni/interface    'clobits.all_targets.IVoidPointer
+                             :ni/type      'org.graalvm.nativeimage.c.type.VoidPointer
                              :ni/wrapper   'clobits.wrappers.WrapVoid
+                             :ni/java-wrapper "new clobits.wrappers.WrapVoid"
                              :ni/unwrap    '.unwrap
                              :poly/wrapper 'wrap-pointer
                              :poly/unwrap  '.unwrap
@@ -22,6 +25,8 @@
    "Uint8"  int-type
    
    "char" {"*" {:ni/type   'org.graalvm.nativeimage.c.type.CCharPointer
+                :ni/wrapper 'clobits.wrappers.WrapPointer
+                :ni/unwrap '.unwrap
                 :poly/type nil
                 :primitive false}
            :poly/type 'char

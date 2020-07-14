@@ -95,3 +95,19 @@
   (if-let [t (get-typing typing type)]
     t
     (throw (Error. (str "No type defined for type: " type)))))
+
+(defn class-name->package
+  [cn]
+  (symbol (str/join "." (butlast (str/split (str cn) #"\.")))))
+
+(comment
+  (class-name->package 'a.b.c)
+  )
+
+(defn unqualify-class
+  [cn]
+  (symbol (last (str/split (str cn) #"\."))))
+
+(comment
+  (unqualify-class 'a.b.c)
+  )

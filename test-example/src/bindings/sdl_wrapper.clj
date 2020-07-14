@@ -15,93 +15,72 @@
 
 (clojure.core/defn
  get-sdl-init-video
- "Ret: {:wrapper long, :annotation long}"
  ^long
  []
- (long (bindings.sdl/get-sdl-init-video)))
+ (bindings.sdl/get-sdl-init-video))
 
 (clojure.core/defn
  get-sdl-window-shown
- "Ret: {:wrapper long, :annotation long}"
  ^long
  []
- (long (bindings.sdl/get-sdl-window-shown)))
+ (bindings.sdl/get-sdl-window-shown))
 
 (clojure.core/defn
  get-null
- "Ret: {:wrapper clobits.wrappers.WrapVoid., :annotation clobits.wrappers.WrapVoid}"
  ^clobits.wrappers.WrapVoid
  []
- (clobits.wrappers.WrapVoid. (bindings.sdl/get-null)))
+ (new clobits.wrappers.WrapVoid (bindings.sdl/get-null)))
 
 (clojure.core/defn
  gen-title
- "Ret: {:wrapper clobits.wrappers.WrapPointer., :annotation clobits.wrappers.WrapPointer}"
  ^clobits.wrappers.WrapPointer
  []
- (clobits.wrappers.WrapPointer. (bindings.sdl/gen-title)))
+ (new clobits.wrappers.WrapPointer (bindings.sdl/gen-title)))
 
 (clojure.core/defn
  create-rect
- "Ret: {:wrapper bindings.sdl_ni_generated.WrapSDL_Rect., :annotation bindings.sdl_ni_generated.WrapSDL_Rect}"
  ^bindings.sdl_ni_generated.WrapSDL_Rect
  [^long x ^long y ^long w ^long h]
- (bindings.sdl_ni_generated.WrapSDL_Rect.
-  (bindings.sdl/create-rect (int x) (int y) (int w) (int h))))
+ (new bindings.sdl_ni_generated.WrapSDL_Rect
+  (bindings.sdl/create-rect x y w h)))
 
 (clojure.core/defn
  get-e
- "Ret: {:wrapper bindings.sdl_ni_generated.WrapSDL_Event., :annotation bindings.sdl_ni_generated.WrapSDL_Event}"
  ^bindings.sdl_ni_generated.WrapSDL_Event
  []
- (bindings.sdl_ni_generated.WrapSDL_Event. (bindings.sdl/get-e)))
+ (new bindings.sdl_ni_generated.WrapSDL_Event (bindings.sdl/get-e)))
 
-(clojure.core/defn
- init
- "Ret: {:wrapper long, :annotation long}"
- ^long
- [^long flags]
- (long (bindings.sdl/init (int flags))))
+(clojure.core/defn init ^long [^long flags] (bindings.sdl/init flags))
 
 (clojure.core/defn
  poll-event
- "Ret: {:wrapper long, :annotation long}"
  ^long
  [^clobits.all_targets.IWrapperNI event]
- (long (bindings.sdl/poll-event (.unwrap event))))
+ (bindings.sdl/poll-event (.unwrap event)))
 
-(clojure.core/defn
- delay
- "Ret: {:wrapper nil, :annotation nil}"
- 
- [^long ms]
- (bindings.sdl/delay (int ms)))
+(clojure.core/defn delay  [^long ms] (bindings.sdl/delay ms))
 
 (clojure.core/defn
  update-window-surface
- "Ret: {:wrapper long, :annotation long}"
  ^long
  [^clobits.all_targets.IWrapperNI window]
- (long (bindings.sdl/update-window-surface (.unwrap window))))
+ (bindings.sdl/update-window-surface (.unwrap window)))
 
 (clojure.core/defn
  get-window-surface
- "Ret: {:wrapper bindings.sdl_ni_generated.WrapSDL_Surface., :annotation bindings.sdl_ni_generated.WrapSDL_Surface}"
  ^bindings.sdl_ni_generated.WrapSDL_Surface
  [^clobits.all_targets.IWrapperNI window]
- (bindings.sdl_ni_generated.WrapSDL_Surface.
+ (new bindings.sdl_ni_generated.WrapSDL_Surface
   (bindings.sdl/get-window-surface (.unwrap window))))
 
 (clojure.core/defn
  map-rgb
- "Ret: {:wrapper long, :annotation long}"
  ^long
  [^clobits.all_targets.IWrapperNI format ^long r ^long g ^long b]
- (long (bindings.sdl/map-rgb (.unwrap format) (int r) (int g) (int b))))
+ (bindings.sdl/map-rgb (.unwrap format) r g b))
 
 (clojure.core/defn
  create-window
- "Ret: {:wrapper clobits.wrappers.WrapVoid., :annotation clobits.wrappers.WrapVoid}"
  ^clobits.wrappers.WrapVoid
  [^clobits.all_targets.IWrapperNI
   title
@@ -115,18 +94,11 @@
   h
   ^Long
   flags]
- (clobits.wrappers.WrapVoid.
-  (bindings.sdl/create-window
-   (.unwrap title)
-   (int x)
-   (int y)
-   (int w)
-   (int h)
-   (int flags))))
+ (new clobits.wrappers.WrapVoid
+  (bindings.sdl/create-window (.unwrap title) x y w h flags)))
 
 (clojure.core/defn
  fill-rect
- "Ret: {:wrapper long, :annotation long}"
  ^long
  [^clobits.all_targets.IWrapperNI
   dst
@@ -134,13 +106,7 @@
   rect
   ^long
   color]
- (long
-  (bindings.sdl/fill-rect (.unwrap dst) (.unwrap rect) (int color))))
+ (bindings.sdl/fill-rect (.unwrap dst) (.unwrap rect) color))
 
-(clojure.core/defn
- quit
- "Ret: {:wrapper nil, :annotation nil}"
- 
- []
- (bindings.sdl/quit))
+(clojure.core/defn quit  [] (bindings.sdl/quit))
 
