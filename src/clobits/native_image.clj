@@ -1,18 +1,10 @@
 (ns clobits.native-image
   (:require [clobits.patch-gen-class :as pgc]
             [clojure.java.io :as io]
-            [clobits.all-targets :as at :refer [gen-clojure-mapping get-type-throw java-friendly]]
-            [clobits.util :as u :refer [snake-case no-subdir]]
+            [clobits.all-targets :as at]
+            [clobits.util :as u :refer [snake-case]]
             [clojure.string :as str]
             [clojure.pprint :refer [pprint pp]]))
-
-(defn lib->package
-  [lib-name]
-  (str lib-name "_ni_generated"))
-
-(defn sym->classname
-  [lib-name clj-sym]
-  (str (lib->package lib-name) "." (java-friendly clj-sym)))
 
 (defn attr->method
   [{:keys [sym pointer] :as arg} {:keys [typing]}]
@@ -22,29 +14,30 @@
                            'org.graalvm.nativeimage.c.struct.CFieldAddress
                            'org.graalvm.nativeimage.c.struct.CField)]
     (concat ;; getter
-     [[(with-meta (symbol sym)
-         {field-or-address sym})
+     [[(symbol (str "^" {field-or-address sym}))
+       (symbol sym)
+       
        []
        (or (:ni/interface t) (:ni/type t))]]
      
      ;; setter
      (when (or (:primitive t)
                (seq pointer)) ;; not sure if setters for non-pointer structs can work
-       [[(with-meta (symbol (str "set_" sym))
-           {org.graalvm.nativeimage.c.struct.CField sym})
+       [[(symbol (str "^" {org.graalvm.nativeimage.c.struct.CField sym}))
+         (symbol (str "set_" sym))
+         
          [(or (:ni/interface t) (:ni/type t))]
          'void]]))))
 
 (defn struct->gen-interface
-  [{:keys [c-sym attrs] :as s} {:keys [lib-name typing c-lib-name] :as opts}]
-  (let [java-friendly-lib-name (java-friendly lib-name)
-        context (symbol (str java-friendly-lib-name "_ni.Headers"))
-        {:keys [interface] :as t} (at/get-typing-throw typing {:type c-sym})]
+  [{:keys [c-sym attrs]} {:keys [ni/context typing c-lib-name] :as opts}]
+  (let [{:keys [interface] :as t} (at/get-typing-throw typing {:type c-sym})]
     `(gen-interface
-      :name ~(with-meta (:ni/interface t)
-               {org.graalvm.nativeimage.c.CContext context
-                org.graalvm.nativeimage.c.function.CLibrary c-lib-name
-                org.graalvm.nativeimage.c.struct.CStruct c-sym})
+      :name ~(symbol (str "^"
+                          {org.graalvm.nativeimage.c.CContext context
+                           org.graalvm.nativeimage.c.function.CLibrary c-lib-name
+                           org.graalvm.nativeimage.c.struct.CStruct c-sym}))
+      ~(:ni/interface t)
       :extends [org.graalvm.word.PointerBase ~interface]
       :methods ~(->> (map #(attr->method % opts) attrs)
                      (apply concat)
@@ -97,7 +90,7 @@
         classname (at/unqualify-class wrapper)
         type (at/unqualify-class type)]
     {:classname wrapper
-     :code (str ;; unused since same package.  "import " (sym->classname lib-name clj-sym) ";"
+     :code (str
             "
 package " (at/class-name->package wrapper) ";
 
@@ -142,14 +135,15 @@ public class " classname " implements " (at/unqualify-class interface) ", IWrapp
   "Generates a method that calls a native function."
   [[f-sym {:keys [ret pointer sym args]}] {:keys [typing]}]
   (let [rt (at/get-typing-throw typing {:type ret, :pointer pointer})]
-    (-> [(with-meta (symbol (str/replace (name f-sym) "-" "_"))
-           {'org.graalvm.nativeimage.c.function.CFunction
-            {:transition 'org.graalvm.nativeimage.c.function.CFunction$Transition/NO_TRANSITION
-             :value sym}})
-         (into [] (map #(-> (at/get-typing-throw typing %)
-                            :ni/type) args))
-         (or (:ni/interface rt) (:ni/type rt))]
-        (with-meta {:static true, :native true}))))
+    [(symbol (str "^" {:static true, :native true}))
+     [(symbol (str "^" {'org.graalvm.nativeimage.c.function.CFunction
+                        {:transition 'org.graalvm.nativeimage.c.function.CFunction$Transition/NO_TRANSITION
+                         :value sym}}))
+      (symbol (str/replace (name f-sym) "-" "_"))
+      
+      (into [] (map #(-> (at/get-typing-throw typing %)
+                         :ni/type) args))
+      (or (:ni/interface rt) (:ni/type rt))]]))
 
 (defn gen-defn
   "Generates a defn-call, which calls a method.
@@ -211,9 +205,9 @@ public class " classname " implements " (at/unqualify-class interface) ", IWrapp
 (defn gen-gen-class
   [{:keys [c-lib-name ni/context ni/class-name]}]
   `(pgc/gen-class-native
-    :name ~(with-meta class-name
-             {org.graalvm.nativeimage.c.CContext context
-              org.graalvm.nativeimage.c.function.CLibrary c-lib-name})))
+    :name ~(symbol (str "^" {org.graalvm.nativeimage.c.CContext context
+                             org.graalvm.nativeimage.c.function.CLibrary c-lib-name}))
+    ~class-name))
 
 (defn gen-wrapper-ns
   [{:keys [clojure-mappings wrappers ni/wrapper-ns] :as opts}]
@@ -224,10 +218,9 @@ public class " classname " implements " (at/unqualify-class interface) ", IWrapp
               (:gen-class))]
           (map #(gen-defn % opts) clojure-mappings)))
 
-
 (defn gen-lib
-  [{:keys [lib-name clojure-mappings append-ni] :as opts}]
-  (concat [`(ns ~(symbol (str (name lib-name) "-ni"))
+  [{:keys [clojure-mappings structs ni/generator-ns ni/header-files] :as opts}]
+  (concat [`(ns ~generator-ns
               (:require [~'clobits.patch-gen-class]
                         [~'clobits.all-targets])
               (:import org.graalvm.word.PointerBase
@@ -251,47 +244,40 @@ public class " classname " implements " (at/unqualify-class interface) ", IWrapp
               org.graalvm.nativeimage.c.CContext$Directives
               (~'getHeaderFiles
                [~'_]
-               [~(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path opts) "\"")]))]
+               ~header-files))]
           
-          append-ni
+          (map #(struct->gen-interface % opts) (vals structs))
           
           [(reverse (into '() (concat (gen-gen-class opts)
-                                      [:methods (into [] (map #(gen-method % opts) clojure-mappings))])))]))
+                                      [:methods (into [] (apply concat (map #(gen-method % opts) clojure-mappings)))])))]))
 
 (defn persist-lib
-  [{:keys [ni-code wrapper-code java-code lib-name] :as opts}]
+  [{:keys [ni-code wrapper-code java-code src-dir ni/wrapper-ns ni/generator-ns] :as opts}]
   
-  (println "Persisting native image clj.")  
+  (println "Persisting native image clj.")
   
-  (with-open [wrtr (io/writer (str "src"
-                                   "/"
-                                   (snake-case (str/replace (str lib-name) "." "/")) "_wrapper.clj"))]
-    (.write wrtr ";; This file is autogenerated -- probably shouldn't modify it by hand\n")
-    (.write wrtr
-            (with-out-str (doseq [f wrapper-code]
-                            (pprint f)
-                            (print "\n")))))
-  
-  (with-open [wrtr (io/writer (str "src"
-                                   "/"
-                                   (snake-case (str/replace (str lib-name) "." "/")) "_ni.clj"))]
-    (.write wrtr ";; This file is autogenerated -- probably shouldn't modify it by hand\n")
-    (.write wrtr
-            (with-out-str (doseq [f ni-code]
-                            (binding [*print-meta* true]
-                              (prn f))
-                            (print "\n")))))
-  
-  (doseq [{:keys [classname code]} java-code]
-    (let [path (str "java-src"
-                    "/"
-                    (snake-case (str/replace (str classname) "." "/"))
-                    ".java")]
-      (println "Writing java to:" path)
-      (u/create-subdirs! path)
-      (with-open [wrtr (io/writer path)]
-        (.write wrtr "// This file is autogenerated -- probably shouldn't modify it by hand\n")
-        (.write wrtr code))))
+  (letfn [(pathify [dir s ext] (str dir "/" (snake-case (str/replace (str s) "." "/")) ext))]
+    (with-open [wrtr (io/writer (pathify src-dir wrapper-ns ".clj"))]
+      (.write wrtr ";; This file is autogenerated -- probably shouldn't modify it by hand\n")
+      (.write wrtr
+              (with-out-str (doseq [f wrapper-code]
+                              (pprint f)
+                              (print "\n")))))
+    
+    (with-open [wrtr (io/writer (pathify src-dir generator-ns ".clj"))]
+      (.write wrtr ";; This file is autogenerated -- probably shouldn't modify it by hand\n")
+      (.write wrtr
+              (with-out-str (doseq [f ni-code]
+                              (pprint f)
+                              (print "\n")))))
+    
+    (doseq [{:keys [classname code]} java-code]
+      (let [path (pathify "java-src" classname ".java")]
+        (println "Writing java to:" path)
+        (u/create-subdirs! path)
+        (with-open [wrtr (io/writer path)]
+          (.write wrtr "// This file is autogenerated -- probably shouldn't modify it by hand\n")
+          (.write wrtr code)))))
   
   opts)
 

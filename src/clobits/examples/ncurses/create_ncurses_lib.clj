@@ -68,9 +68,11 @@
               :protos (concat (map pc/parse-c-prototype functions)
                               (map pc/parse-c-prototype prototypes))
               
+              :ni/generator-ns (symbol (str (name lib-name) "-ni"))
               :ni/class-name (symbol (at/java-friendly lib-name))
               :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))
               :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))
+              :ni/header-files [(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path {:src-dir "src", :lib-name lib-name}) "\"")]
               :c-lib-name    (u/so-lib-name-ni lib-name)              
               
               :structs structs
@@ -91,10 +93,7 @@
         opts (ni/persist-lib opts)]
     opts)
   
-  (println "Done!")
-  
-  (shutdown-agents) ;; need this when running lein exec
-  )
+  (println "Done!"))
 
 (comment
   (-main)

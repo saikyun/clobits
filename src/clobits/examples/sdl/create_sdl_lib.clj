@@ -221,25 +221,6 @@ int SDL_FillRect(SDL_Surface*    dst,
    "SDL_Window" 'org.graalvm.nativeimage.c.type.VoidPointer
    "SDL_PixelFormat" 'bindings.sdl_ni_generated.SDL_PixelFormat})
 
-(def struct-wrappers
-  (into {}
-        (map (fn [{:keys [clj-sym c-sym]}]
-               (let [t (get-type-throw types {:type c-sym})]
-                 [t (symbol (str (ni/lib->package 'bindings.sdl)
-                                 "." (symbol (str "Wrap" clj-sym))))]))
-             (vals structs))))
-
-(def wrappers
-  (merge struct-wrappers
-         {'org.graalvm.nativeimage.c.type.VoidPointer 
-          'clobits.wrappers.WrapVoid
-          'clobits.all_targets.IVoidPointer
-          'clobits.wrappers.WrapVoid
-          'org.graalvm.word.PointerBase
-          'clobits.wrappers.WrapPointer
-          'org.graalvm.nativeimage.c.type.CCharPointer
-          'clobits.wrappers.WrapPointer}))
-
 (def opts
   {:inline-c (str/join "\n" functions)
    :protos (concat (map pc/parse-c-prototype functions)
@@ -249,6 +230,8 @@ int SDL_FillRect(SDL_Surface*    dst,
    
    :ni/class-name (symbol (at/java-friendly lib-name))
    :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))
+   :ni/generator-ns (symbol (str (name lib-name) "-ni"))
+   :ni/header-files [(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path {:src-dir "src", :lib-name lib-name}) "\"")]
    :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))
    :c-lib-name    (u/so-lib-name-ni lib-name)
    
@@ -262,10 +245,7 @@ int SDL_FillRect(SDL_Surface*    dst,
    
    ;; obsolete
    :primitives primitives    
-   :types types   
-   :wrappers wrappers})
-
-(def ni-interfaces (map #(ni/struct->gen-interface % opts) (vals structs)))
+   :types types})
 
 (defn -main
   []
@@ -273,8 +253,7 @@ int SDL_FillRect(SDL_Surface*    dst,
   (.mkdir (java.io.File. "libs"))
   
   (println "Generating bindings.sdl")
-  (let [opts (assoc opts :append-ni ni-interfaces)
-        opts (merge opts (gcee/gen-lib opts))
+  (let [opts (merge opts (gcee/gen-lib opts))
         _ (gcee/persist-lib! opts)
         opts (gp/gen-lib opts)
         opts (gp/persist-lib opts)
