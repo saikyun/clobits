@@ -30,7 +30,7 @@
          'void]]))))
 
 (defn struct->gen-interface
-  [{:keys [c-sym attrs]} {:keys [ni/context typing c-lib-name] :as opts}]
+  [{:keys [c-sym attrs]} {:keys [ni/context typing ni/c-lib-name] :as opts}]
   (let [{:keys [interface] :as t} (at/get-typing-throw typing {:type c-sym})]
     `(gen-interface
       :name ~(symbol (str "^"
@@ -203,7 +203,7 @@ public class " classname " implements " (at/unqualify-class interface) ", IWrapp
             call)))))
 
 (defn gen-gen-class
-  [{:keys [c-lib-name ni/context ni/class-name]}]
+  [{:keys [ni/c-lib-name ni/context ni/class-name]}]
   `(pgc/gen-class-native
     :name ~(symbol (str "^" {org.graalvm.nativeimage.c.CContext context
                              org.graalvm.nativeimage.c.function.CLibrary c-lib-name}))

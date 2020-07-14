@@ -73,7 +73,7 @@
               :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))
               :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))
               :ni/header-files [(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path {:src-dir "src", :lib-name lib-name}) "\"")]
-              :c-lib-name    (u/so-lib-name-ni lib-name)              
+              :c/ni-so-path    (u/so-lib-name-ni lib-name)              
               
               :structs structs
               :includes ["ncurses.h" "stdlib.h" "string.h"]
@@ -85,6 +85,7 @@
               :src-dir "src"
               :lib-dir "libs"
               :libs ["ncurses"]}
+        opts (merge opts (cc/generate-lib-names opts))
         opts (merge opts (gcee/gen-lib opts))
         _ (gcee/persist-lib! opts)
         opts (gp/gen-lib opts)

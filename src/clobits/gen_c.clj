@@ -1,6 +1,6 @@
 (ns clobits.gen-c
   (:require [clojure.string :as str]
-            [clobits.util :as u :refer [add-prefix-to-sym create-subdirs! snake-case get-c-path get-h-path get-so-path]]
+            [clobits.util :as u :refer [add-prefix-to-sym create-subdirs!]]
             [clojure.java.shell :refer [sh]]))
 
 (defn get-arg
@@ -126,8 +126,8 @@
          (str/join "\n" fn-declarations))))
 
 (defn gen-lib
-  [{:keys [lib-name includes protos shadow-prefix] :or {shadow-prefix "_SHADOWING_"} :as opts}]
-  (let [c-code (str (gen-c-file [(str (last (str/split (snake-case lib-name) #"/")) ".h")]
+  [{:keys [includes protos shadow-prefix c/header-file] :or {shadow-prefix "_SHADOWING_"} :as opts}]
+  (let [c-code (str (gen-c-file [header-file]
                                 (map generate-shadowing-function protos)
                                 opts))
         protos-as-data-shadowed (map (partial add-prefix-to-sym shadow-prefix) protos)
@@ -141,34 +141,31 @@
      :h-code h-code}))
 
 (defn compile-c
-  [{:keys [c-code h-code libs] :as opts}]
-  (let [c-path (get-c-path opts) 
-        h-path (get-h-path opts)]
-    
-    (create-subdirs! c-path)
-    (create-subdirs! h-path)
-    
-    (println "Spitting c-code:" (apply str (take 100 c-code)) "...\n")
-    (spit c-path (str c-code))
-    
-    (println "Spitting h-code:" (apply str (take 100 h-code)) "...\n")
-    (spit h-path h-code)
-    
-    (println "Going to compile...")
-    
-    (let [r1 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
-                                   (map #(str "-l" %) (conj libs "polyglot-mock"))
-                                   ["-shared" "-fPIC" "-D" "IS_POLYGLOT=1" "-o" (get-so-path opts)])]
-               (apply sh sh-opts))
-          
-          r2 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
-                                   (map #(str "-l" %) libs)
-                                   ["-shared" "-fPIC" "-o" (u/get-so-path-ni opts)])]
-               (apply sh sh-opts))]
-      (println "Compilation results:")
-      (println r1)
-      (println r2)
-      [r1 r2])))
+  [{:keys [c-code h-code libs c/c-path c/h-path] :as opts}]
+  (create-subdirs! c-path)
+  (create-subdirs! h-path)
+  
+  (println "Spitting c-code:" (apply str (take 100 c-code)) "...\n")
+  (spit c-path (str c-code))
+  
+  (println "Spitting h-code:" (apply str (take 100 h-code)) "...\n")
+  (spit h-path h-code)
+  
+  (println "Going to compile...")
+  
+  (let [r1 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
+                                 (map #(str "-l" %) (conj libs "polyglot-mock"))
+                                 ["-shared" "-fPIC" "-D" "IS_POLYGLOT=1" "-o" (:poly/so-path opts)])]
+             (apply sh sh-opts))
+        
+        r2 (let [sh-opts (concat [(str (System/getenv "LLVM_TOOLCHAIN") "/clang") c-path]
+                                 (map #(str "-l" %) libs)
+                                 ["-shared" "-fPIC" "-o" (:ni/so-path opts)])]
+             (apply sh sh-opts))]
+    (println "Compilation results:")
+    (println r1)
+    (println r2)
+    [r1 r2]))
 
 (defn persist-lib!
   [opts]

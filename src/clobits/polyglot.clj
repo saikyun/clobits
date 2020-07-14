@@ -1,25 +1,23 @@
 (ns clobits.polyglot
   (:require [clojure.string :as str]
-            [clobits.util :refer [add-prefix-to-sym create-subdirs! get-so-path]]
-            [clobits.all-targets :refer [gen-clojure-mapping get-type-throw convert-function-throw
-                                         get-typing-throw
-                                         struct-sym->interface-sym java-friendly]]
+            [clobits.util :as u :refer [add-prefix-to-sym create-subdirs! get-so-path]]
+            [clobits.all-targets :as at :refer [gen-clojure-mapping get-typing-throw]]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pp pprint]]))
 
 (defn attr->poly-method
-  [typing {:keys [sym type] :as arg}]
-  (let [{:keys [poly/type]} (get-typing-throw typing arg)]
+  [typing {:keys [sym] :as arg}]
+  (let [{:keys [poly/type]} (at/get-typing-throw typing arg)]
     [[(symbol sym) [] type]
      [(symbol (str "set_" sym)) [type] 'void]]))
 
 (defn struct->gen-interface
-  [{:keys [clj-sym attrs]} {:keys [lib-name typing]}]
-  (let [java-friendly-lib-name (str/replace lib-name "-" "_")]
+  [{:keys [c-sym attrs]} {:keys [typing]}]
+  (let [{:keys [interface]} (at/get-typing-throw typing {:type c-sym})]
     `(gen-interface
       :name
       ~(symbol (str "^" {org.graalvm.polyglot.HostAccess$Implementable true}))
-      ~(symbol (struct-sym->interface-sym lib-name clj-sym))
+      ~interface
       
       :methods ~(->> (map #(attr->poly-method typing %) attrs)
                      (apply concat)
@@ -28,7 +26,7 @@
 (defn gen-defn
   "Generates a defn-call, which calls a method.
   The function resulting from evaluating the defn-call will wrap / unwrap native values / wrappers as needed."
-  [[f-sym {:keys [ret pointer sym args] :as func}] {:keys [lib-sym typing]}]
+  [[f-sym {:keys [ret pointer sym args]}] {:keys [lib-sym typing]}]
   (let [f (if (= ret "void")
             '.executeVoid
             '.execute) 
@@ -83,16 +81,14 @@
              call)))]))
 
 (defn lib-boilerplate
-  [lib-name {:keys [libs] :as opts}]
+  [{:keys [libs poly/ns-name] :as opts}]
   (let [lib-sym 'polyglot-lib #_ (gensym (str "lib"))
         context-f-sym 'context-f #_ (gensym "context-f") 
         context-sym  'polyglot-context
         source-f-sym 'source-f #_ (gensym "source-f")
         so-path (get-so-path opts)]
-    {:lib-name lib-name
-     :libs libs
-     :lib-sym lib-sym
-     :forms (concat [`(ns ~(symbol (str lib-name "-ns"))
+    {:lib-sym lib-sym
+     :forms (concat [`(ns ~ns-name
                         (:require [clojure.java.io])
                         (:import org.graalvm.polyglot.Context
                                  org.graalvm.polyglot.Source
@@ -161,8 +157,8 @@
           gen-wrappers))))
 
 (defn gen-lib*
-  [lib-name fns {:keys [structs] :as opts}]
-  (let [bp (lib-boilerplate lib-name opts)
+  [fns {:keys [structs] :as opts}]
+  (let [bp (lib-boilerplate opts)
         defn-forms (apply concat (map #(gen-defn % (assoc opts :lib-sym (:lib-sym bp))) fns))]
     (concat (:forms bp)
             (map #(struct->gen-interface % opts) (vals structs))
@@ -170,7 +166,7 @@
             defn-forms)))
 
 (defn gen-lib
-  [{:keys [lib-name protos shadow-prefix] :as opts}]
+  [{:keys [protos shadow-prefix] :as opts}]
   (let [protos-as-data-shadowed (map (partial add-prefix-to-sym shadow-prefix) protos)
         clojure-mappings (concat
                           (map #(gen-clojure-mapping % 
@@ -178,16 +174,14 @@
                                                                  "_SHADOWING_"]})
                                protos-as-data-shadowed))
         
-        clojure-lib (gen-lib* lib-name clojure-mappings opts)]
+        clojure-lib (gen-lib* clojure-mappings opts)]
     (merge opts
            {:clojure-mappings clojure-mappings
             :clojure-lib clojure-lib})))
 
 (defn persist-lib
-  [{:keys [src-dir lib-name] :as opts}]
-  (let [path (str src-dir
-                  "/"
-                  (str/replace (str lib-name "_ns") "." "/") ".clj")]
+  [{:keys [src-dir poly/ns-name] :as opts}]
+  (let [path (str src-dir "/" (str/replace (str (u/snake-case ns-name)) "." "/") ".clj")]
     
     (create-subdirs! path)  
     
