@@ -1,7 +1,10 @@
 (ns clobits.core
   (:require [clojure.string :as str]
             [clobits.all-targets :as at]
-            [clobits.util :as u]))
+            [clobits.util :as u]
+            [clobits.polyglot :as gp]
+            [clobits.gen-c :as gcee]
+            [clobits.native-image :as ni]))
 
 (def int-type {#_#_:ni/wrapper 'int
                :ni/type 'int
@@ -83,3 +86,17 @@
    
    :c/c-path (u/get-c-path opts)
    :c/h-path (u/get-h-path opts)})
+
+(defn gen-and-persist!
+  [opts]
+  (println "Generating " (:lib-name opts))  
+  (let [opts (merge opts (gcee/gen-lib opts))
+        _ (gcee/persist-lib! opts)
+        opts (gp/gen-lib opts)
+        opts (gp/persist-lib opts)
+        opts (assoc opts :ni-code (ni/gen-lib opts))
+        opts (assoc opts :wrapper-code (ni/gen-wrapper-ns opts))
+        opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class % opts) (vals (:structs opts))))
+        opts (ni/persist-lib opts)]
+    (println "Done!")
+    opts))

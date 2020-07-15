@@ -18,6 +18,9 @@
              :compile-sdl {:aot [bindings.sdl-ns bindings.sdl-ni]
                            :compile-path "classes/"}
              
+             :compile-ncurses {:aot [bindings.ncurses-ns bindings.ncurses-ni]
+                               :compile-path "classes/"}
+             
              :uberjar {:global-vars {*assert* false}
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"
                                   "-Dclojure.spec.skip-macros=true"]                           

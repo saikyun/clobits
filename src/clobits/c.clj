@@ -46,7 +46,7 @@
   "More efficient than `str*` but single arity."
   [s]
   (if *native-image*
-    `(.get (CTypeConversion/toCString ~s))
+    `(.get (org.graalvm.nativeimage.c.type.CTypeConversion/toCString ~s))
     s))
 
 (defmacro str*
@@ -55,5 +55,6 @@
   ([& ss]
    (let [s# `(apply str ~(into [] ss))]
      (if *native-image*
-       `(.get (CTypeConversion/toCString ~s#))
+       `(clobits.wrappers.WrapPointer. (.get (org.graalvm.nativeimage.c.type.CTypeConversion/toCString ~s#)))
        s#))))
+

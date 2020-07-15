@@ -3,11 +3,6 @@
             [clobits.core :as cc]
             
             [clobits.parse-c :as pc] 
-            [clobits.util :as u]
-            [clobits.all-targets :as at]
-            [clobits.native-image :as ni]
-            [clobits.polyglot :as gp]
-            [clobits.gen-c :as gcee]
             
             [clojure.pprint :refer [pp pprint]]))
 
@@ -35,66 +30,27 @@
 
 (def structs {})
 
-(def types
-  {"void" {"*" 'org.graalvm.nativeimage.c.type.VoidPointer
-           nil 'void}
-   "int" 'int
-   "char" {"*" 'org.graalvm.nativeimage.c.type.CCharPointer
-           nil 'char}
-   "va_list" 'org.graalvm.nativeimage.c.type.VoidPointer
-   "WINDOW" 'org.graalvm.nativeimage.c.type.VoidPointer})
-
-(def ni-interfaces (map #(ni/struct->gen-interface types % {:lib-name lib-name}) (vals structs)))
-(def poly-interfaces (map #(gp/struct->gen-interface types % {:lib-name lib-name}) (vals structs)))
-
 (def typing
   (merge cc/default-typing
          {"WINDOW" cc/void-pointer-type}))
 
-(def conversion-functions
-  {'int '.asInt
-   'org.graalvm.nativeimage.c.type.VoidPointer 'identity
-   'org.graalvm.nativeimage.c.type.CCharPointer 'identity #_ '.asString ;; constant char* can't be coerced into strings
-   'void 'identity})
+(def opts (let [opts {:inline-c (str/join "\n" functions)
+                      :typing typing
+                      :protos (concat (map pc/parse-c-prototype functions)
+                                      (map pc/parse-c-prototype prototypes))
+                      
+                      :structs structs
+                      :includes ["ncurses.h" "stdlib.h" "string.h"]
+                      
+                      :lib-name lib-name
+                      :src-dir "src"
+                      :lib-dir "libs"
+                      :libs ["ncurses"]}]
+            (merge opts (cc/generate-lib-names opts))))
 
 (defn -main
   []
-  (println "Creating libs")
-  (.mkdir (java.io.File. "libs"))
-  
-  (println "Generating" lib-name)
-  (let [opts {:inline-c (str/join "\n" functions)
-              :typing typing
-              :protos (concat (map pc/parse-c-prototype functions)
-                              (map pc/parse-c-prototype prototypes))
-              
-              :ni/generator-ns (symbol (str (name lib-name) "-ni"))
-              :ni/class-name (symbol (at/java-friendly lib-name))
-              :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))
-              :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))
-              :ni/header-files [(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path {:src-dir "src", :lib-name lib-name}) "\"")]
-              :c/ni-so-path    (u/so-lib-name-ni lib-name)              
-              
-              :structs structs
-              :includes ["ncurses.h" "stdlib.h" "string.h"]
-              :append-clj poly-interfaces
-              :poly-conversions conversion-functions
-              :append-ni ni-interfaces
-              :types types
-              :lib-name lib-name
-              :src-dir "src"
-              :lib-dir "libs"
-              :libs ["ncurses"]}
-        opts (merge opts (cc/generate-lib-names opts))
-        opts (merge opts (gcee/gen-lib opts))
-        _ (gcee/persist-lib! opts)
-        opts (gp/gen-lib opts)
-        opts (gp/persist-lib opts)
-        opts (assoc opts :ni-code (ni/gen-lib opts))
-        opts (ni/persist-lib opts)]
-    opts)
-  
-  (println "Done!"))
+  (cc/gen-and-persist! opts))
 
 (comment
   (-main)

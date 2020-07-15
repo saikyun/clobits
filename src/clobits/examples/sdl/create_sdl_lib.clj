@@ -3,12 +3,6 @@
             [clobits.parse-c :as pc] 
             [clobits.core :as cc]
             
-            [clobits.all-targets :as at]
-            [clobits.util :as u]
-            [clobits.native-image :as ni]
-            [clobits.polyglot :as gp]
-            [clobits.gen-c :as gcee]
-            
             [clojure.pprint :refer [pp pprint]]))
 
 (def lib-name 'bindings.sdl)
@@ -93,11 +87,10 @@ int SDL_FillRect(SDL_Surface*    dst,
                        {:sym "w" :type "Uint16"}
                        {:sym "h" :type "Uint16"}]}})
 
-(def typing
-  (merge
-   cc/default-typing
-   (cc/generate-struct-typing lib-name (map key structs))
-   {"SDL_Window" cc/void-pointer-type}))
+(def typing (merge
+             cc/default-typing
+             (cc/generate-struct-typing lib-name (map key structs))
+             {"SDL_Window" cc/void-pointer-type}))
 
 (def opts
   (let [opts {:inline-c (str/join "\n" functions)
@@ -117,21 +110,7 @@ int SDL_FillRect(SDL_Surface*    dst,
 
 (defn -main
   []
-  (println "Creating libs")
-  (.mkdir (java.io.File. "libs"))
-  
-  (println "Generating bindings.sdl")
-  (let [opts (merge opts (gcee/gen-lib opts))
-        _ (gcee/persist-lib! opts)
-        opts (gp/gen-lib opts)
-        opts (gp/persist-lib opts)
-        opts (assoc opts :ni-code (ni/gen-lib opts))
-        opts (assoc opts :wrapper-code (ni/gen-wrapper-ns opts))
-        opts (assoc opts :java-code (map #(ni/struct->gen-wrapper-class % opts) (vals structs)))
-        opts (ni/persist-lib opts)]
-    opts)
-  
-  (println "Done!"))
+  (cc/gen-and-persist! opts))
 
 (when (System/getenv "REPLING")
   (-main)

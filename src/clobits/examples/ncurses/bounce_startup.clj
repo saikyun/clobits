@@ -1,4 +1,5 @@
-#_ (set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)        ; reflection warnings on structs means
+                                        ; that native image will crash when accessing fields
 
 ;; following along
 ;; https://www.viget.com/articles/game-programming-in-c-with-the-ncurses-library/
@@ -6,39 +7,24 @@
   (:require [clobits.native-interop :refer [*native-image*]]
             [clobits.c :as c]
             [clojure.pprint :refer [pprint]])
-  (:import #_WrapVoid
-           clobits.wrappers.WrapPointer
-           org.graalvm.nativeimage.c.type.VoidPointer
-           java.util.Vector)
-  (:gen-class
-   :methods [[rs2 [org.graalvm.nativeimage.c.type.VoidPointer] clojure.lang.PersistentArrayMap]]))
+  (:gen-class))
 
 (if *native-image*
   (do (println "In native image context")
-      (require '[bindings.ncurses_ni])
-      (import '[bindings ncurses])
-      (import '[org.graalvm.nativeimage.c.type CTypeConversion])
-      (import 'org.graalvm.nativeimage.c.type.VoidPointer))
+      (require '[bindings.ncurses-wrapper :as ncurses])
+      (import '[bindings.sdl_ni_generated WrapSDL_Surface WrapSDL_Rect]))
   (do (println "In polyglot context")
       (require '[bindings.ncurses-ns :as ncurses])))
 
 (defonce win (atom nil))
-
-
-(defn -rs2
-  [win]
-  {:x 0, :y 0
-   :max-x (ncurses/getmaxx win)
-   :max-y (ncurses/getmaxy win)
-   :dir 1})
 
 (defn reset-state
   ([] (reset-state {}))
   ([state]
    (merge state
           {:x 0, :y 0
-           :max-x (ncurses/getmaxx (.unwrap @win))
-           :max-y (ncurses/getmaxy (.unwrap @win))
+           :max-x (ncurses/getmaxx @win)
+           :max-y (ncurses/getmaxy @win)
            :dir 1})))
 
 (defn print-state!
@@ -71,8 +57,8 @@
                   (update state :dir -)
                   (update state :x + dir))]
       (-> state
-          (assoc :max-x (ncurses/getmaxx (.unwrap win)))
-          (assoc :max-y (ncurses/getmaxy (.unwrap win)))
+          (assoc :max-x (ncurses/getmaxx win))
+          (assoc :max-y (ncurses/getmaxy win))
           (assoc :y 0)))
     
     (catch Exception e
@@ -100,7 +86,7 @@
 
 (defn -main []
   (let [www (ncurses/initscr)]
-    (reset! win (WrapPointer. www))
+    (reset! win www)
     
     (ncurses/refresh)
     (ncurses/noecho)

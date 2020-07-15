@@ -28,10 +28,12 @@ sdl-bindings:
 
 ncurses-bindings:
 	lein exec -ep "(require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main) (shutdown-agents)"
+	lein with-profiles +compile-ncurses compile
 
 bindings:
 	lein exec -ep "(require '[clobits.examples.sdl.create-sdl-lib]) (clobits.examples.sdl.create-sdl-lib/-main) (require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main) (shutdown-agents)"
 	lein with-profiles +compile-sdl compile
+	lein with-profiles +compile-ncurses compile
 
 dev-repl:
 	REPLING=true lein with-profiles +socket,+compare-files repl
