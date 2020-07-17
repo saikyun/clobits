@@ -11,10 +11,9 @@
 
 (if *native-image*
   (do (println "In native image context")
-      (require '[bindings.ncurses-wrapper :as ncurses])
-      (import '[bindings.sdl_ni_generated WrapSDL_Surface WrapSDL_Rect]))
+      (require '[clobits.ncurses.ni :as ncurses]))
   (do (println "In polyglot context")
-      (require '[bindings.ncurses-ns :as ncurses])))
+      (require '[clobits.ncurses.poly :as ncurses])))
 
 (defonce win (atom nil))
 

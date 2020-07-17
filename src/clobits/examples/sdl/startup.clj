@@ -4,15 +4,14 @@
 (ns clobits.examples.sdl.startup
   (:require [clobits.native-interop :refer [*native-image*]] ; this just sets *native-image*
             [clobits.examples.sdl.constants :as cs])
-  (:import [bindings.sdl_structs ISDL_Surface ISDL_Rect])
+  (:import [clobits.sdl Surface Rect])
   (:gen-class))
 
 (if *native-image*
   (do (println "In native image context")
-      (require '[bindings.sdl-wrapper :as sdl])
-      (import '[bindings.sdl_ni_generated WrapSDL_Surface WrapSDL_Rect]))
+      (require '[clobits.sdl.ni :as sdl]))
   (do (println "In polyglot context")
-      (require '[bindings.sdl-ns :as sdl])))
+      (require '[clobits.sdl.poly :as sdl])))
 
 (comment
   (.getMemberKeys (.getMember (.execute (.getMember sdl/polyglot-lib "_SHADOWING_get_e") (clojure.core/object-array [])) "key"))
@@ -92,8 +91,8 @@
 
 (defn main-loop
   [window 
-   ^ISDL_Surface screen
-   ^ISDL_Rect rect
+   ^Surface screen
+   ^Rect rect
    state]
   (let [state (cond-> (handle-input state)
                 (-> state :down :right) (update-in [:pos :x] inc)
@@ -109,7 +108,7 @@
     
     state))
 
-(defn -main [& args]
+(defn -main []
   (sdl/init (sdl/get-sdl-init-video))
   
   (let [window (sdl/create-window (sdl/gen-title)

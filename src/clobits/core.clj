@@ -44,44 +44,44 @@
                   :primitive true})})
 
 (defn generate-struct-typing
-  [lib-name struct-names]
+  [{:keys [lib-name prefixes]} struct-names]
   (->> struct-names
        (map (fn [sym]
-              (let [i-sym (symbol (str lib-name "_structs." "I" sym))]
+              (let [tiny-sym (u/remove-prefixes sym prefixes)
+                    i-sym (symbol (str lib-name "." tiny-sym))]
                 [sym {:c-sym sym
                       :primitive    false
                       :interface    i-sym
                       
-                      :poly/type    i-sym                                        
-                      :poly/unwrap  '.unwrap                      
-                      :poly/wrapper                      
+                      :poly/type    i-sym
+                      :poly/unwrap  '.unwrap
+                      :poly/wrapper
                       (with-meta
-                        (symbol (str #_ lib-name #_ ".poly/" "wrap-" 
-                                     (-> (at/java-friendly sym)
-                                         #_(u/remove-prefixes ["SDL_"])
+                        (symbol (str "wrap-" 
+                                     (-> (at/java-friendly tiny-sym)
                                          str/lower-case
                                          u/snake->kebab)))
                         {:clobits.core/generate true})
                       
-                      :ni/interface (symbol (str lib-name "_ni_generated." sym))
+                      :ni/interface (symbol (str lib-name ".ni.I" tiny-sym))
                       :ni/unwrap    '.unwrap
-                      :ni/wrapper   (symbol (str lib-name "_ni_generated.Wrap" sym))
-                      :ni/java-wrapper   (str "new " lib-name "_ni_generated.Wrap" sym)
-                      :ni/type      (symbol (str lib-name "_ni_generated." sym))}])))
+                      :ni/wrapper   (symbol (str lib-name ".ni." tiny-sym "Wrapper"))
+                      :ni/java-wrapper   (str "new " lib-name ".ni." tiny-sym "Wrapper")
+                      :ni/type      (symbol (str lib-name ".ni.I" tiny-sym))}])))
        (into {})))
 
 (defn generate-lib-names
   [{:keys [lib-name] :as opts}]
-  {:ni/class-name (symbol (at/java-friendly lib-name))
-   :ni/wrapper-ns (symbol (str (name lib-name) "-wrapper"))   
-   :ni/generator-ns (symbol (str (name lib-name) "-ni"))   
-   :ni/header-files [(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path {:src-dir "src", :lib-name lib-name}) "\"")]   
-   :ni/context    (symbol (str (at/java-friendly lib-name) "_ni.Headers"))   
+  {:ni/class-name (symbol (str (at/java-friendly lib-name) ".ni.interop"))
+   :ni/wrapper-ns (symbol (str (name lib-name) ".ni"))
+   :ni/generator-ns (symbol (str (name lib-name) ".ni.generate"))
+   :ni/header-files [(str "\"" (System/getProperty "user.dir") "/" (u/get-h-path opts) "\"")]
+   :ni/context    (symbol (str (at/java-friendly lib-name) ".ni.generate.Headers"))
    
    :ni/c-lib-name (u/so-lib-name-ni lib-name)
    :ni/so-path    (u/get-so-path-ni opts)
    :poly/so-path  (u/get-so-path opts)
-   :poly/ns-name  (symbol (str lib-name "-ns"))
+   :poly/ns-name  (symbol (str lib-name ".poly"))
    :c/header-file (str (last (str/split (u/snake-case lib-name) #"/")) ".h")
    
    :c/c-path (u/get-c-path opts)

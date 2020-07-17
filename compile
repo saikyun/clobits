@@ -27,7 +27,7 @@ elif [[ "$NI_EXAMPLE" == "bounce" ]]; then
     NAME="bounce_example"
 fi
 
-lein with-profiles +clojure-1.10.2-alpha1,+$OS_FLAG,+$NI_EXAMPLE-uberjar,+with-java do uberjar
+lein with-profiles +clojure-1.10.2-alpha1,+$OS_FLAG,+$NI_EXAMPLE-uberjar,+compile-java do uberjar
 
 args=( "-jar" $TARGET_JAR \
               "-H:CLibraryPath=libs" \

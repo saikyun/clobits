@@ -5,7 +5,7 @@
             
             [clojure.pprint :refer [pp pprint]]))
 
-(def lib-name 'bindings.sdl)
+(def lib-name 'clobits.sdl)
 
 (def functions
   ["int GET_SDL_INIT_VIDEO() { return SDL_INIT_VIDEO; }"
@@ -89,7 +89,7 @@ int SDL_FillRect(SDL_Surface*    dst,
 
 (def typing (merge
              cc/default-typing
-             (cc/generate-struct-typing lib-name (map key structs))
+             (cc/generate-struct-typing {:lib-name lib-name, :prefixes ["SDL_"]} (map key structs))
              {"SDL_Window" cc/void-pointer-type}))
 
 (def opts
@@ -103,7 +103,7 @@ int SDL_FillRect(SDL_Surface*    dst,
               :includes ["stdio.h" "SDL2/SDL.h"]
               :typing typing
               :lib-name lib-name
-              :src-dir "src"
+              :src-dir "example-src"
               :lib-dir "libs"
               :libs ["SDL2"]}]
     (merge opts (cc/generate-lib-names opts))))
@@ -115,4 +115,4 @@ int SDL_FillRect(SDL_Surface*    dst,
 (when (System/getenv "REPLING")
   (-main)
   (load-file "src/bindings/sdl_ns.clj")
-  (load-file "test-src/test_examples.clj"))
+  #_  (load-file "test-src/test_examples.clj"))

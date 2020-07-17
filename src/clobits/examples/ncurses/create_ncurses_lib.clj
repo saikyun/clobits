@@ -6,7 +6,7 @@
             
             [clojure.pprint :refer [pp pprint]]))
 
-(def lib-name 'bindings.ncurses)
+(def lib-name 'clobits.ncurses)
 
 (def functions [])
 
@@ -43,7 +43,7 @@
                       :includes ["ncurses.h" "stdlib.h" "string.h"]
                       
                       :lib-name lib-name
-                      :src-dir "src"
+                      :src-dir "example-src"
                       :lib-dir "libs"
                       :libs ["ncurses"]}]
             (merge opts (cc/generate-lib-names opts))))

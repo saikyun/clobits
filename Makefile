@@ -10,11 +10,11 @@ endif
 
 clean:
 	-rm sdl_example
-	-rm -r src/bindings
+	-rm -r example-src/*
 	-rm -r target
 	-rm -r libs/*
-	-rm -r classes/bindings
-	-rm -r java-src/bindings
+	-rm -r classes/*
+	-rm -r java-src/clobits/sdl
 
 get-ni:
 	$(GRAALVM_HOME)/bin/gu install native-image || true
@@ -32,6 +32,7 @@ ncurses-bindings:
 
 bindings:
 	lein exec -ep "(require '[clobits.examples.sdl.create-sdl-lib]) (clobits.examples.sdl.create-sdl-lib/-main) (require '[clobits.examples.ncurses.create-ncurses-lib]) (clobits.examples.ncurses.create-ncurses-lib/-main) (shutdown-agents)"
+	lein with-profiles +compile-clobits compile
 	lein with-profiles +compile-sdl compile
 	lein with-profiles +compile-ncurses compile
 
@@ -51,7 +52,6 @@ sdl-poly: bindings
 
 sp:
 	lein with-profiles $(OSFLAG),+sdl-poly,+socket do clean, run
-
 
 ncurses-poly: bindings
 	lein with-profiles $(OSFLAG),+ncurses-poly do clean, run

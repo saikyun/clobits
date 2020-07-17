@@ -1,7 +1,7 @@
 (defproject clobits "0.1.0"
   :dependencies [[org.clojure/clojure "1.10.1"]]
   :plugins [[lein-exec "0.3.7"]]
-  :source-paths ["src"]
+  :source-paths ["src" "example-src"]
   :jvm-opts []
   :resources ["src" "libs"]
   :resource-paths ["classes"]
@@ -9,16 +9,16 @@
   :profiles {:compare-files {:dependencies [[digest "1.4.9"]]
                              :source-paths ["test-src"]}
              
-             :with-java {:java-source-paths ["java-src"]
-                         :aot :all}
+             :compile-java {:java-source-paths ["java-src"]
+                            :aot :all}
              
              :compile-clobits {:aot [clobits.all-targets]
                                :compile-path "classes/"}
              
-             :compile-sdl {:aot [bindings.sdl-ns bindings.sdl-ni]
+             :compile-sdl {:aot [clobits.sdl.poly clobits.sdl.ni.generate]
                            :compile-path "classes/"}
              
-             :compile-ncurses {:aot [bindings.ncurses-ns bindings.ncurses-ni]
+             :compile-ncurses {:aot [clobits.ncurses.poly clobits.ncurses.ni.generate]
                                :compile-path "classes/"}
              
              :uberjar {:global-vars {*assert* false}
