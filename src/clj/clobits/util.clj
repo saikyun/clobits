@@ -28,12 +28,12 @@
   (snake-case (str/replace s "." "$")))
 
 (defn get-c-path
-  [{:keys [src-dir lib-name]}]
-  (str src-dir "/" (snake-case lib-name) ".c"))
+  [{:keys [c-src-dir lib-name]}]
+  (str c-src-dir "/" (snake-case lib-name) ".c"))
 
 (defn get-h-path
-  [{:keys [src-dir lib-name]}]
-  (str src-dir "/" (snake-case lib-name) ".h"))
+  [{:keys [c-src-dir lib-name]}]
+  (str c-src-dir "/" (snake-case lib-name) ".h"))
 
 (defn so-lib-name-ni
   [s]

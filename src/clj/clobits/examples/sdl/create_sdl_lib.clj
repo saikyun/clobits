@@ -103,6 +103,7 @@ int SDL_FillRect(SDL_Surface*    dst,
               :includes ["stdio.h" "SDL2/SDL.h"]
               :typing typing
               :lib-name lib-name
+              :c-src-dir "examples/src/c"
               :src-dir "examples/src/clj"
               :java-src-dir "examples/src/java"
               :lib-dir "libs"

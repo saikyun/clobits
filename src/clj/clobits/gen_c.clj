@@ -144,6 +144,9 @@
   [{:keys [c-code h-code libs c/c-path c/h-path] :as opts}]
   (create-subdirs! c-path)
   (create-subdirs! h-path)
+
+  (create-subdirs! (:poly/so-path opts))
+  (create-subdirs! (:ni/so-path opts))
   
   (println "Spitting c-code:" (apply str (take 100 c-code)) "...\n")
   (spit c-path (str c-code))

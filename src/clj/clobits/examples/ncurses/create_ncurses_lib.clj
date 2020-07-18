@@ -43,6 +43,7 @@
                       :includes ["ncurses.h" "stdlib.h" "string.h"]
                       
                       :lib-name lib-name
+                      :c-src-dir "examples/src/c"
                       :src-dir "examples/src/clj"
                       :java-src-dir "examples/src/java"
                       :lib-dir "libs"

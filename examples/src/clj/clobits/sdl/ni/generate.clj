@@ -23,7 +23,7 @@
  org.graalvm.nativeimage.c.CContext$Directives
  (getHeaderFiles
   [_]
-  ["\"/Users/test/programmering/clojure/clobits/examples/src/clj/clobits/sdl.h\""]))
+  ["\"/Users/test/programmering/clojure/clobits/examples/src/c/clobits/sdl.h\""]))
 
 (clojure.core/gen-interface
  :name

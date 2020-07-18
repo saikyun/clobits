@@ -84,6 +84,7 @@
    :ni/so-path    (u/get-so-path-ni opts)
    :poly/so-path  (u/get-so-path opts)
    :poly/ns-name  (symbol (str lib-name ".poly"))
+   
    :c/header-file (str (last (str/split (u/snake-case lib-name) #"/")) ".h")
    
    :c/c-path (u/get-c-path opts)

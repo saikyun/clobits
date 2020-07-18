@@ -7,7 +7,8 @@
   
   :resources ["libs"]
   
-  :clean-targets [:target-path "examples"]
+  :clean-targets [:target-path "examples" "libs"]
+
   :prep-tasks [["with-profile" "compile-clobits" "compile"]]
   
   :profiles {:compare-files {:dependencies [[digest "1.4.9"]]
