@@ -1,45 +1,81 @@
 (defproject clobits "0.1.0"
   :dependencies [[org.clojure/clojure "1.10.1"]]
   :plugins [[lein-exec "0.3.7"]]
-  :source-paths ["src" "example-src"]
-  :jvm-opts []
-  :resources ["src" "libs"]
-  :resource-paths ["classes"]
+  
+  :source-paths ["src/clj"]
+  :java-source-paths ["src/java"]  
+  
+  :resources ["libs"]
+  
+  :clean-targets [:target-path "examples"]
+  :prep-tasks [["with-profile" "compile-clobits" "compile"]]
   
   :profiles {:compare-files {:dependencies [[digest "1.4.9"]]
                              :source-paths ["test-src"]}
              
-             :compile-java {:java-source-paths ["java-src"]
+             :compile-clobits {:prep-tasks ^:replace []
+                               :aot [clobits.wrappers]
+                               ;;:compile-path "target/classes/"
+                               }
+             
+             :gen-sdl {:prep-tasks ^:replace []
+                       :main clobits.examples.sdl.create-sdl-lib}
+             
+             :gen-ncurses {:prep-tasks ^:replace []
+                           :main clobits.examples.ncurses.create-ncurses-lib}
+             
+             :compile-java {:java-source-paths ["examples/src/java"]
                             :aot :all}
              
-             :compile-clobits {:aot [clobits.all-targets]
-                               :compile-path "classes/"}
+             :compile-sdl {:prep-tasks [["with-profile" "gen-sdl" "run"] "compile"]
+                           :aot [clobits.sdl.structs clobits.sdl.ni.generate]
+                           :java-source-paths ["examples/src/java"]
+                           :source-paths ["examples/src/clj"]}             
              
-             :compile-sdl {:aot [clobits.sdl.poly clobits.sdl.ni.generate]
-                           :compile-path "classes/"}
+             :compile-ncurses {:prep-tasks [["with-profile" "gen-ncurses" "run"] "compile"]
+                               :aot [clobits.ncurses.ni.generate]
+                               :java-source-paths ["examples/src/java"]
+                               :source-paths ["examples/src/clj"]}
              
-             :compile-ncurses {:aot [clobits.ncurses.poly clobits.ncurses.ni.generate]
-                               :compile-path "classes/"}
+             :uberjar {:jvm-opts ["-Dclojure.compiler.direct-linking=true"
+                                  "-Dclojure.spec.skip-macros=true"]}
              
-             :uberjar {:global-vars {*assert* false}
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                                  "-Dclojure.spec.skip-macros=true"]                           
-                       :aot :all}
+             :sdl-uberjar {:prep-tasks [["with-profile" "compile-sdl" "compile"]
+                                        "javac"
+                                        "compile"]
+                           :source-paths ["examples/src/clj"]
+                           :java-source-paths ["examples/src/java"]
+                           :uberjar-name "examples_sdl.jar"
+                           :main clobits.examples.sdl.startup
+                           :aot [clobits.examples.sdl.startup]}
              
-             :sdl-uberjar {:main clobits.examples.sdl.startup
-                           :uberjar-name "examples_sdl.jar"}
-             
-             :ncurses-uberjar {:main clobits.examples.ncurses.startup
+             :ncurses-uberjar {:prep-tasks [["with-profile" "compile-ncurses" "compile"]
+                                            "javac"
+                                            "compile"]
+                               :main clobits.examples.ncurses.startup
+                               :aot [clobits.examples.ncurses.startup]
+                               :source-paths ["examples/src/clj"]
                                :uberjar-name "examples_ncurses.jar"}
              
-             :bounce-uberjar {:main clobits.examples.ncurses.bounce-startup
-                              :uberjar-name "examples_bounce.jar"}
+             :bounce-uberjar {:prep-tasks [["with-profile" "compile-ncurses" "compile"]
+                                           "javac"
+                                           "compile"]
+                              :source-paths ["examples/src/clj"]
+                              :uberjar-name "examples_bounce.jar"
+                              :main clobits.examples.ncurses.bounce-startup                              
+                              :aot [clobits.examples.ncurses.bounce-startup]}
              
-             :sdl-poly {:main clobits.examples.sdl.startup}
+             :sdl-poly {:prep-tasks [["with-profile" "compile-sdl" "compile"]]
+                        :main clobits.examples.sdl.startup
+                        :source-paths ["examples/src/clj"]}
              
-             :ncurses-poly {:main clobits.examples.ncurses.startup}
+             :ncurses-poly {:prep-tasks [["with-profile" "compile-ncurses" "compile"]]
+                            :main clobits.examples.ncurses.startup
+                            :source-paths ["examples/src/clj"]}
              
-             :bounce-poly {:main clobits.examples.ncurses.bounce-startup}
+             :bounce-poly {:prep-tasks [["with-profile" "compile-ncurses" "compile"]]
+                           :main clobits.examples.ncurses.bounce-startup
+                           :source-paths ["examples/src/clj"]}
              
              
              :macos {:jvm-opts [;; sdl function regarding the window / renderer
