@@ -1,4 +1,4 @@
-Structure of an example, in this case sdl:
+The structure of an example, in this case sdl, is as follows:
 
 ## sdl/create-src 
 
