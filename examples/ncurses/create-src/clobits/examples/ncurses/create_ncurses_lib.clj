@@ -1,10 +1,7 @@
 (ns clobits.examples.ncurses.create-ncurses-lib
   (:require [clojure.string :as str]
             [clobits.core :as cc]
-            
-            [clobits.parse-c :as pc] 
-            
-            [clojure.pprint :refer [pp pprint]]))
+            [clobits.parse-c :as pc]))
 
 (def lib-name 'clobits.ncurses)
 

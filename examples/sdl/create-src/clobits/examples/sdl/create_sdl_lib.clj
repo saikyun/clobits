@@ -103,9 +103,9 @@ int SDL_FillRect(SDL_Surface*    dst,
               :includes ["stdio.h" "SDL2/SDL.h"]
               :typing typing
               :lib-name lib-name
-              :c-src-dir "examples/sdl/src/c"
-              :src-dir "examples/sdl/src/clj"
-              :java-src-dir "examples/sdl/src/java"
+              :c-src-dir "examples/sdl/gen-src/c"
+              :src-dir "examples/sdl/gen-src/clj"
+              :java-src-dir "examples/sdl/gen-src/java"
               :lib-dir "libs"
               :libs ["SDL2"]}]
     (merge opts (cc/generate-lib-names opts))))

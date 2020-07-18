@@ -23,7 +23,7 @@
  org.graalvm.nativeimage.c.CContext$Directives
  (getHeaderFiles
   [_]
-  ["\"/Users/test/programmering/clojure/clobits/examples/ncurses/src/c/clobits/ncurses.h\""]))
+  ["\"/Users/test/programmering/clojure/clobits/examples/ncurses/gen-src/c/clobits/ncurses.h\""]))
 
 (clobits.patch-gen-class/gen-class-native
  :name

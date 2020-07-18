@@ -1,7 +1,7 @@
 (set! *warn-on-reflection* true)        ; reflection warnings on structs means
                                         ; that native image will crash when accessing fields
 
-(ns clobits.examples.sdl.startup
+(ns clobits.examples.sdl.wasd-rect
   (:require [clobits.native-interop :refer [*native-image*]] ; this just sets *native-image*
             [clobits.examples.sdl.constants :as cs])
   (:import [clobits.sdl Surface Rect])
@@ -51,16 +51,16 @@
         768 ;; key down
         (do
           (case+ (.sym (.keysym (.key (sdl/get-e))))
-                 cs/e
+                 cs/d
                  (update state :down conj :right)                 
                  
                  cs/a                 
                  (update state :down conj :left)
                  
-                 cs/ä
+                 cs/w
                  (update state :down conj :up)                 
                  
-                 cs/o                 
+                 cs/s                 
                  (update state :down conj :down)
                  
                  (do
@@ -69,16 +69,16 @@
         
         769 ;; key up
         (case+ (.sym (.keysym (.key (sdl/get-e))))
-               cs/e
+               cs/d
                (update state :down disj :right)
                
                cs/a
                (update state :down disj :left)
                
-               cs/ä
+               cs/w
                (update state :down disj :up)                 
                
-               cs/o                 
+               cs/s                 
                (update state :down disj :down)
                
                (do

@@ -14,7 +14,7 @@ clean:
 	-rm -r target
 	-rm -r libs/*
 	-rm -r classes/*
-	-rm -r examples/*
+	-rm -r examples/*/gen-src
 
 dev-repl:
 	REPLING=true lein with-profiles +socket,+compare-files repl
@@ -34,5 +34,5 @@ sdl-ni:
 ncurses-ni:
 	NATIVE_IMAGE=true NI_EXAMPLE=ncurses ./compile && LD_LIBRARY_PATH=./libs ./ncurses_example
 
-bounce-ni: bindings
+bounce-ni:
 	NATIVE_IMAGE=true NI_EXAMPLE=bounce ./compile && LD_LIBRARY_PATH=./libs ./bounce_example
