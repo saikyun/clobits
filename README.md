@@ -7,22 +7,29 @@ Use C inside Clojure, then run it on the JVM or compile a native binary.
 - One source to rule them all — write code once, run it on both jvm and native binary
 
 ```clojure
-(ns clobits.examples.sdl.startup
-  (:require [clobits.native-interop :refer [*native-image*]])
+(ns clobits.examples.ncurses.hello-world
+  (:require [clobits.native-interop :refer [*native-image*]]
+            [clobits.c :as c])
   (:gen-class))
 
 (if *native-image*
   (do (println "In native image context")
-      (require '[bindings.sdl_ni])
-      (import '[bindings sdl]))
+      (require '[clobits.ncurses.ni :as ncurses]))
   (do (println "In polyglot context")
-      (require '[bindings.sdl-ns :as sdl])))
+      (require '[clobits.ncurses.poly :as ncurses])))
 
 (defn -main [& args]
-  (sdl/init (sdl/get-sdl-init-video)))
+  (let [w (ncurses/initscr)]
+    
+    (ncurses/printw (c/str* "hello"))
+    (ncurses/curs-set 0)
+    (ncurses/refresh)
+    (Thread/sleep 1000)
+    
+    (ncurses/endwin)))
 ```
 
-For a more complete example, check out `src/clobits/examples/sdl/startup.clj`
+For a bigger example, check out [`wasd_rect.clj`](https://github.com/Saikyun/clobits/blob/master/examples/sdl/src/clobits/examples/sdl/wasd_rect.clj)
 
 ### Misc. features
 
