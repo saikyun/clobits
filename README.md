@@ -7,27 +7,35 @@ Use C inside Clojure, then run it on the JVM or compile a native binary.
 - One source to rule them all — write code once, run it on both jvm and native binary
 
 ```clojure
-(ns clobits.examples.sdl.startup
-  (:require [clobits.native-interop :refer [*native-image*]])
+(ns clobits.examples.ncurses.hello-world
+  (:require [clobits.native-interop :refer [*native-image*]]
+            [clobits.c :as c])
   (:gen-class))
 
 (if *native-image*
   (do (println "In native image context")
-      (require '[bindings.sdl_ni])
-      (import '[bindings sdl]))
+      (require '[clobits.ncurses.ni :as ncurses]))
   (do (println "In polyglot context")
-      (require '[bindings.sdl-ns :as sdl])))
+      (require '[clobits.ncurses.poly :as ncurses])))
 
 (defn -main [& args]
-  (sdl/init (sdl/get-sdl-init-video)))
+  (let [w (ncurses/initscr)]
+    
+    (ncurses/printw (c/str* "hello"))
+    (ncurses/curs-set 0)
+    (ncurses/refresh)
+    (Thread/sleep 1000)
+    
+    (ncurses/endwin)))
 ```
 
-For a more complete example, check out `src/clobits/examples/sdl/startup.clj`
+For a bigger example, check out [`wasd_rect.clj`](https://github.com/Saikyun/clobits/blob/master/examples/sdl/src/clobits/examples/sdl/wasd_rect.clj)
 
 ### Misc. features
 
 - Parse C function prototypes to Clojure maps
 - Generate .h/.c-files and Clojure namespaces based off of C function prototypes or using Clojure maps
+- Generate wrapper classes for easier use of c functions / structs in clojure
 
 ## Project status
 
@@ -38,8 +46,6 @@ I'd be very happy if you tried to use it and have questions. If you have a speci
 ### Known unknowns and possible solutions
 
 - Calling variadic C functions that do not have a `va_args` variation (see [printf](http://www.cplusplus.com/reference/cstdio/printf/?kw=printf) vs [vprintf](http://www.cplusplus.com/reference/cstdio/vprintf/))
-  - If the function has a `va_args` variant, I'd recommend just using that for now
-- Sending pointer values to clojure functions doesn't work. This is because all clojure functions assume the arguments are Objects, which makes the ni compiler complain, with this message: `Expected Object but got Word for call argument`. Sadly there doesn't seem to be any practical way to tell clojure functions to accept Word-types. I've digged through deftype / gen-class and even tried modifying some of them, to no avail. The solution I came up with is wrapping all Word types (pointers) with wrapper classes. This is fine in order to get things working, but I'm not sure how performant it is.
 
 If you know how to solve the problems below, please tell me how! :) Either through an issue, or [@Saikyun](https://twitter.com/Saikyun) on twitter.
 
@@ -61,21 +67,14 @@ git clone https://github.com/Saikyun/clobits
 cd clobits
 ```
 
-
-## Generate bindings (optional)
-
-```
-make clean bindings
-```
-
-# ncurses Example
+# ncurses hello-world example
 
 Displays `hello` for a second.
 
 ## Run on JVM using Polyglot
 
 ```
-make clean ncurses-poly
+make ncurses-poly
 ```
 
 ## Compile and run a native binary using native-image
@@ -84,7 +83,24 @@ make clean ncurses-poly
 make clean ncurses-ni
 ```
 
-# SDL Example
+# ncurses bounce example
+
+Displays `hello` for a second.
+
+## Run on JVM using Polyglot
+
+```
+make bounce-poly
+```
+
+## Compile and run a native binary using native-image
+
+```
+make bounce-ni
+```
+
+
+# SDL wasd-rect example
 
 ## Get libSDL2
 
@@ -93,43 +109,24 @@ You need libSDL2 on your path, and possibly added to `"-Djava.library.path=<LIB_
 ## Run on JVM using Polyglot
 
 ```
-make clean sdl-poly
+make sdl-poly
 ```
 
 ## Compile and run a native binary using native-image
 
 ```
-make clean sdl-ni
+make sdl-ni
 ```
 
-You should see a red square on a white background.
-Cmd+Q to exit on MacOS. You can also press the X.
+You should see a red square, that you can control with wasd
 
-## Errors
+## Examples
 
-If you don't run `clean` when switching between poly / ni targets you can get complaints about not finding `clojure.core/seq?`. I think this has to do with how leningen caches .class-files. Just run `make clean ni / poly` and you'll be fine.
+The [examples](https://github.com/Saikyun/clobits/tree/master/examples) contain source code and more information about the examples.
 
-## The generated files
+## Play around
 
-Running `make clean bindings` generates the folder `src/bindings`. This folder is included in the repo so that one can read the generated source when looking at github. As soon as you start using this library, you will overwrite these files. They should not be modified by hand.
-
-In `src/bindings` you'll find:
-
-#### sdl.c and sdl.h -- generated c code
-
-These are necessary for polyglot to be able to call native libs.
-
-### sdl_ni.clj
-
-Clojure code that generates classes and interfaces to be with native-image
-
-#### sdl_ns.clj
-
-Clojure namespace that is used with polyglot.
-
-### How to put it all together
-
-Look at `src/clobits/examples/startup.clj` to see how you can use the same code for both polyglot and native-image.
+If you start one of the examples in polyglot-mode you can connect to it using a repl. I usually go with a socket repl on port 5555, which is automatically started when you use the makefile.
 
 ## Thanks
 
