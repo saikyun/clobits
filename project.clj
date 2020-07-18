@@ -25,17 +25,17 @@
              
              :compile-ncurses {:prep-tasks [["with-profile" "gen-ncurses" "run"] "compile"]
                                :aot [clobits.ncurses.ni.generate]
-                               :java-source-paths ["examples/src/java"]
-                               :source-paths ["examples/src/clj"]}
+                               :java-source-paths ["examples/ncurses/src/java"]
+                               :source-paths ["examples/ncurses/src/clj"]}
              
              
              :ncurses-poly {:prep-tasks [["with-profile" "compile-ncurses" "compile"]]
                             :main clobits.examples.ncurses.startup
-                            :source-paths ["examples/src/clj"]}             
+                            :source-paths ["examples/ncurses/src/clj"]}             
              
              :bounce-poly {:prep-tasks [["with-profile" "compile-ncurses" "compile"]]
                            :main clobits.examples.ncurses.bounce-startup
-                           :source-paths ["examples/src/clj"]}             
+                           :source-paths ["examples/ncurses/src/clj"]}             
              
              
              :ncurses-uberjar {:prep-tasks [["with-profile" "compile-ncurses" "compile"]
@@ -43,13 +43,13 @@
                                             "compile"]
                                :main clobits.examples.ncurses.startup
                                :aot [clobits.examples.ncurses.startup]
-                               :source-paths ["examples/src/clj"]
+                               :source-paths ["examples/ncurses/src/clj"]
                                :uberjar-name "examples_ncurses.jar"}
              
              :bounce-uberjar {:prep-tasks [["with-profile" "compile-ncurses" "compile"]
                                            "javac"
                                            "compile"]
-                              :source-paths ["examples/src/clj"]
+                              :source-paths ["examples/ncurses/src/clj"]
                               :uberjar-name "examples_bounce.jar"
                               :main clobits.examples.ncurses.bounce-startup
                               :aot [clobits.examples.ncurses.bounce-startup]}
@@ -63,20 +63,20 @@
              
              :compile-sdl {:prep-tasks [["with-profile" "gen-sdl" "run"] "compile"]
                            :aot [clobits.sdl.structs clobits.sdl.ni.generate]
-                           :java-source-paths ["examples/src/java"]
-                           :source-paths ["examples/src/clj"]}
+                           :java-source-paths ["examples/sdl/src/java"]
+                           :source-paths ["examples/sdl/src/clj"]}
              
              
              :sdl-poly {:prep-tasks [["with-profile" "compile-sdl" "compile"]]
                         :main clobits.examples.sdl.startup
-                        :source-paths ["examples/src/clj"]}
+                        :source-paths ["examples/sdl/src/clj"]}
              
              
              :sdl-uberjar {:prep-tasks [["with-profile" "compile-sdl" "compile"]
                                         "javac"
                                         "compile"]
-                           :source-paths ["examples/src/clj"]
-                           :java-source-paths ["examples/src/java"]
+                           :source-paths ["examples/sdl/src/clj"]
+                           :java-source-paths ["examples/sdl/src/java"]
                            :uberjar-name "examples_sdl.jar"
                            :main clobits.examples.sdl.startup
                            :aot [clobits.examples.sdl.startup]}             

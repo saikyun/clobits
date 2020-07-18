@@ -43,9 +43,9 @@
                       :includes ["ncurses.h" "stdlib.h" "string.h"]
                       
                       :lib-name lib-name
-                      :c-src-dir "examples/src/c"
-                      :src-dir "examples/src/clj"
-                      :java-src-dir "examples/src/java"
+                      :c-src-dir "examples/ncurses/src/c"
+                      :src-dir "examples/ncurses/src/clj"
+                      :java-src-dir "examples/ncurses/src/java"
                       :lib-dir "libs"
                       :libs ["ncurses"]}]
             (merge opts (cc/generate-lib-names opts))))
