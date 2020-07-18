@@ -1,4 +1,4 @@
-(defproject clobits "0.1.0"
+(defproject clobits "0.2.0"
   :dependencies [[org.clojure/clojure "1.10.1"]]
   :plugins [[lein-exec "0.3.7"]]
   
